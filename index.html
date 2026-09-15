@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Santosh Fashion Point | Men's, Kids & Ladies Innerwear</title>
+  <meta name="description" content="Santosh Fashion Point - Men's garments, kids wear, ladies innerwear, jeans, T-shirts, trousers, shirts and jackets.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">🚚 Online shopping • Delivery across India • Easy WhatsApp ordering</div>
+
+  <header class="header">
+    <a class="brand" href="#">
+      <span class="logo">SFP</span>
+      <span><b>Santosh</b><small>Fashion Point</small></span>
+    </a>
+    <div class="search">
+      <input id="searchInput" type="search" placeholder="Search jeans, T-shirt, shirt, kids wear...">
+      <button onclick="searchProducts()">Search</button>
+    </div>
+    <button class="cartBtn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+  </header>
+
+  <nav class="nav">
+    <a href="#home">Home</a>
+    <a href="#categories">Categories</a>
+    <a href="#products">Best Sellers</a>
+    <a href="#shop">Our Shop</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <main>
+    <section id="home" class="hero">
+      <div class="heroText">
+        <span class="pill">✨ NEW ONLINE STORE</span>
+        <h1>Fashion for <span>Everyday Life.</span></h1>
+        <p>Men's garments • Kids wear • Ladies innerwear • Jeans • T-shirts • Trousers • Shirts • Jackets</p>
+        <div class="heroActions">
+          <a class="primary" href="#products">Shop Now →</a>
+          <a class="secondary" href="https://wa.me/919835567894" target="_blank">WhatsApp Order</a>
+        </div>
+        <div class="trust">
+          <div>⭐ Quality products</div><div>📦 India delivery</div><div>💬 WhatsApp support</div>
+        </div>
+      </div>
+      <div class="heroImage">
+        <img src="assets/shop-photo-2.jpg" alt="Santosh Fashion Point shop">
+        <div class="floatCard"><b>All Varieties</b><br><span>Men • Kids • Ladies</span></div>
+      </div>
+    </section>
+
+    <section id="categories" class="section">
+      <div class="sectionHead"><div><span class="eyebrow">SHOP BY CATEGORY</span><h2>What are you looking for?</h2></div></div>
+      <div class="catGrid">
+        <button class="cat" onclick="filterCategory('Men')"><span>👔</span><b>Men's Fashion</b><small>Shirts, T-shirts, trousers</small></button>
+        <button class="cat" onclick="filterCategory('Jeans')"><span>👖</span><b>Jeans</b><small>Everyday & stylish fits</small></button>
+        <button class="cat" onclick="filterCategory('Kids')"><span>🧒</span><b>Kids Wear</b><small>Comfortable & trendy</small></button>
+        <button class="cat" onclick="filterCategory('Ladies')"><span>🩷</span><b>Ladies Innerwear</b><small>Comfort-focused collection</small></button>
+        <button class="cat" onclick="filterCategory('Jacket')"><span>🧥</span><b>Jackets</b><small>Seasonal styles</small></button>
+      </div>
+    </section>
+
+    <section id="products" class="section productsSection">
+      <div class="sectionHead">
+        <div><span class="eyebrow">TRENDING NOW</span><h2>Featured Products</h2></div>
+        <div class="filters">
+          <button class="filter active" onclick="filterCategory('All')">All</button>
+          <button class="filter" onclick="filterCategory('Men')">Men</button>
+          <button class="filter" onclick="filterCategory('Kids')">Kids</button>
+          <button class="filter" onclick="filterCategory('Ladies')">Ladies</button>
+        </div>
+      </div>
+      <div id="productGrid" class="productGrid"></div>
+    </section>
+
+    <section id="shop" class="shopSection">
+      <div class="shopPhoto"><img src="assets/shop-photo-1.jpg" alt="Inside Santosh Fashion Point"></div>
+      <div class="shopInfo">
+        <span class="eyebrow">VISIT OUR STORE</span>
+        <h2>Santosh Fashion Point</h2>
+        <p>We have a wide variety of men's garments, kids wear and ladies innerwear. Our online store is being built to make ordering simple from your phone.</p>
+        <div class="infoList">
+          <div>🛍️ <b>Wide collection</b><span>Men's • Kids • Ladies</span></div>
+          <div>📲 <b>Quick ordering</b><span>Order directly on WhatsApp</span></div>
+          <div>📦 <b>Online delivery</b><span>Shipping options can be added</span></div>
+        </div>
+        <a class="primary" href="https://wa.me/919835567894" target="_blank">Chat on WhatsApp</a>
+      </div>
+    </section>
+
+    <section class="benefits">
+      <div><b>🔒 Secure</b><span>Safe checkout-ready design</span></div>
+      <div><b>🚚 Delivery</b><span>India-wide shipping setup</span></div>
+      <div><b>↩️ Easy Support</b><span>WhatsApp customer support</span></div>
+      <div><b>💳 Payments</b><span>UPI / COD can be connected</span></div>
+    </section>
+
+    <section id="contact" class="contact">
+      <div>
+        <span class="eyebrow">CONTACT</span>
+        <h2>Ready to order?</h2>
+        <p>Send the product name/ID, size and quantity on WhatsApp.</p>
+      </div>
+      <div class="contactCards">
+        <a href="https://wa.me/919835567894" target="_blank">📱 <b>WhatsApp</b><span>983t567894</span></a>
+        <a href="mailto:santoshrawani123@gmail.com">✉️ <b>Email</b><span>santoshrawani123@gmail.com</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><b>Santosh Fashion Point</b><span>Men's • Kids • Ladies Fashion</span></div>
+    <span>© 2026 Santosh Fashion Point. All rights reserved.</span>
+  </footer>
+
+  <div id="cartModal" class="modal hidden">
+    <div class="modalBox">
+      <button class="close" onclick="closeCart()">×</button>
+      <h2>Your Cart</h2>
+      <div id="cartItems"></div>
+      <div class="cartTotal"><b>Total</b><strong id="cartTotal">₹0</strong></div>
+      <button class="primary full" onclick="checkoutWhatsApp()">Order on WhatsApp</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
