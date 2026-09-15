@@ -74,3 +74,38 @@ updateCounts();renderProducts();renderCart();
   });
   const css=document.createElement('style');css.textContent=`.collectionGroup li{cursor:pointer;transition:transform .15s,opacity .15s}.collectionGroup li:hover,.collectionGroup li:focus{opacity:1;transform:translateX(3px)}.collectionGroup li.sfh-sub-active{font-weight:900;text-decoration:underline;text-underline-offset:4px}`;document.head.appendChild(css);
 })();
+
+/* SFH_MULTI_PHOTO_GALLERY_V1 */
+(function initSfhMultiPhotoGallery(){
+  const maxPhotos=5;
+  const sfhImages=p=>{
+    const a=Array.isArray(p?.images)?p.images.filter(Boolean).slice(0,maxPhotos):[];
+    if(!a.length&&p?.image)a.push(p.image);
+    return a;
+  };
+  const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
+  const css=`
+  .sfhGallery{display:flex;flex-direction:column;gap:10px;height:100%;min-height:360px}
+  .sfhGalleryMain{position:relative;flex:1;min-height:300px;border-radius:18px;overflow:hidden;background:rgba(255,255,255,.035);display:flex;align-items:center;justify-content:center}
+  .sfhGalleryMain img{width:100%;height:100%;object-fit:contain;display:block}
+  .sfhGalleryNav{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px;pointer-events:none}
+  .sfhGalleryNav button{pointer-events:auto;width:42px;height:42px;border:1px solid rgba(255,255,255,.22);border-radius:50%;background:rgba(8,12,24,.78);color:#fff;font-size:24px;cursor:pointer;backdrop-filter:blur(5px)}
+  .sfhGalleryCounter{position:absolute;right:12px;top:12px;padding:6px 10px;border-radius:999px;background:rgba(8,12,24,.78);font-size:12px;font-weight:800}
+  .sfhGalleryThumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+  .sfhGalleryThumb{aspect-ratio:1/1;border:1px solid rgba(255,255,255,.12);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.03);cursor:pointer;padding:0}
+  .sfhGalleryThumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .sfhGalleryThumb.active{outline:2px solid currentColor;outline-offset:1px}
+  .sfhGalleryHint{font-size:11px;opacity:.72;text-align:center;margin-top:-2px}
+  @media(max-width:700px){.sfhGallery{min-height:260px}.sfhGalleryMain{min-height:230px}.sfhGalleryThumbs{grid-template-columns:repeat(5,1fr)}.sfhGalleryNav button{width:38px;height:38px;font-size:21px}}
+  `;
+  if(!document.getElementById('sfh-multi-photo-css')){const st=document.createElement('style');st.id='sfh-multi-photo-css';st.textContent=css;document.head.appendChild(st)}
+  function renderGallery(p){
+    const imgs=sfhImages(p);
+    if(!imgs.length)return `<div class="sfhGallery"><div class="sfhGalleryMain"><div class="art">${p.art||'👕'}</div></div></div>`;
+    return `<div class="sfhGallery" data-gallery-id="${esc(p.id)}" data-gallery-index="0"><div class="sfhGalleryMain"><img id="sfhGalleryMainImg" src="${esc(imgs[0])}" alt="${esc(p.name)} - Front view" loading="eager">${imgs.length>1?`<div class="sfhGalleryNav"><button aria-label="Previous photo" onclick="sfhGalleryPrev()">‹</button><button aria-label="Next photo" onclick="sfhGalleryNext()">›</button></div>`:''}<div class="sfhGalleryCounter"><span id="sfhGalleryPos">1</span> / ${imgs.length}</div></div>${imgs.length>1?`<div class="sfhGalleryThumbs">${imgs.map((src,i)=>`<button class="sfhGalleryThumb ${i===0?'active':''}" data-idx="${i}" onclick="sfhGalleryGo(${i})"><img src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}" loading="lazy"></button>`).join('')}</div><div class="sfhGalleryHint">Front • Left • Right • Back • Detail</div>`:''}</div>`;
+  }
+  window.sfhGalleryGo=function(index){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const imgs=sfhImages(p);if(!imgs.length)return;const i=Math.max(0,Math.min(Number(index)||0,imgs.length-1));g.dataset.galleryIndex=i;const img=g.querySelector('#sfhGalleryMainImg');if(img){img.src=imgs[i];img.alt=`${p.name} - Photo ${i+1}`}const pos=g.querySelector('#sfhGalleryPos');if(pos)pos.textContent=String(i+1);g.querySelectorAll('.sfhGalleryThumb').forEach((b,n)=>b.classList.toggle('active',n===i))};
+  window.sfhGalleryPrev=function(){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const n=sfhImages(p).length;const cur=Number(g.dataset.galleryIndex)||0;if(n)sfhGalleryGo(cur<=0?n-1:cur-1)};
+  window.sfhGalleryNext=function(){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const n=sfhImages(p).length;const cur=Number(g.dataset.galleryIndex)||0;if(n)sfhGalleryGo((cur+1)%n)};
+  window.quickView=function(id){const p=products.find(x=>x.id===id);if(!p)return;const out=Number(p.stock)<=0;document.getElementById('quickViewContent').innerHTML=`<div class="quickGrid"><div class="quickArt">${renderGallery(p)}</div><div class="quickInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>★★★★★</span></div><h2>${p.name}</h2><p>${p.desc}</p><h3>${money(p.price)} <span class="old">${money(p.old)}</span></h3>${out?'<p><strong>🔴 Out of Stock</strong></p>':'<><b>Choose size</b><div class="sizeBtns">'+p.sizes.map((s,i)=>`<button class="${i===0?'selected':''}" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')+'</div></>'}<button class="btn primary full" ${out?'disabled':''} onclick="addQuickToCart('${p.id}')">${out?'Out of Stock':'Add to Cart'}</button><a class="btn outline full" style="margin-top:8px" target="_blank" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please share available sizes, price and delivery details.')}">💬 Ask on WhatsApp</a></div></div>`;document.getElementById('quickView').classList.add('open')};
+})();
