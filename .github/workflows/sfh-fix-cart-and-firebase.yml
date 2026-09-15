@@ -1,0 +1,48 @@
+name: SFH Fix Cart and Firebase Scripts
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'script.js'
+      - 'sfh-step5-product-details.js'
+      - 'sfh-step6-checkout.js'
+      - 'firebase-config.js'
+      - 'sfh-step17-firestore-sync.js'
+      - '.github/workflows/sfh-fix-cart-and-firebase.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure required storefront scripts are loaded
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          wanted = [
+              '<script src="./script.js"></script>',
+              '<script src="./sfh-step5-product-details.js"></script>',
+              '<script src="./sfh-step6-checkout.js"></script>',
+              '<script src="./firebase-config.js"></script>',
+              '<script src="./sfh-step17-firestore-sync.js"></script>',
+          ]
+          for tag in wanted:
+              if tag not in s:
+                  s = s.replace('</body>', tag + '\n</body>')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit storefront script fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No storefront script changes needed.'
+          else
+            git commit -m 'Fix storefront cart and Firebase script loading'
+            git push
+          fi
