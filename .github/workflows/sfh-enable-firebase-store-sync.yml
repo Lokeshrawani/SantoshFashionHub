@@ -1,0 +1,23 @@
+name: Enable Firebase store sync
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  patch-store:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Firebase product bridge to storefront script
+        shell: bash
+        run: |
+          set -e
+          if ! grep -q "sfh-firebase-store-bridge.js" script.js; then
+            printf '\n/* SFH_FIREBASE_STORE_BRIDGE */\nimport("./sfh-firebase-store-bridge.js").catch(console.warn);\n' >> script.js
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add script.js
+            git commit -m "Connect storefront to Firebase product catalogue"
+            git push
+          fi
