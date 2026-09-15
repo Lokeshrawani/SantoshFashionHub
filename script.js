@@ -42,75 +42,13 @@ function sendEnquiry(e){e.preventDefault();const n=document.getElementById('enqN
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.classList.remove('show'),2200)}
 updateCounts();renderProducts();renderCart();
 
-/* Santosh Fashion Hub: clickable fashion portal + subcategory explorer + photo sharing */
-(function(){
-  const PORTALS={
-    Men:{icon:'👔',title:"Men's Wear",desc:'Topwear, bottomwear, ethnic wear, activewear, innerwear, loungewear and accessories.',groups:{
-      'Topwear':['T-Shirts','Polos','Casual Shirts','Formal Shirts','Sweatshirts & Hoodies','Jackets','Blazers & Suits'],
-      'Bottomwear':['Jeans','Trousers & Chinos','Casual Shorts','Track Pants & Joggers'],
-      'Ethnic Wear':['Kurtas & Kurta Sets','Nehru Jackets','Sherwanis'],
-      'Activewear':['Sports T-Shirts','Gym Shorts','Tracksuits'],
-      'Innerwear & Loungewear':['Vests','Briefs & Trunks','Boxers','Pyjama Sets'],
-      'Accessories':['Belts','Wallets','Ties & Pocket Squares','Caps & Socks']
-    }},
-    Women:{icon:'👗',title:"Ladies' / Women's Wear",desc:'Western, ethnic & traditional, lingerie & nightwear, activewear and accessories.',groups:{
-      'Western Wear':['Tops & Tees','Dresses & Jumpsuits','Shirts & Blouses','Jeans & Jeggings','Trousers & Pants','Skirts','Jackets & Shrugs','Blazers'],
-      'Ethnic & Traditional Wear':['Sarees','Kurtas & Kurtis','Suit Sets (Salwar/Anarkali)','Lehengas','Palazzos & Leggings','Dupattas'],
-      'Lingerie & Nightwear':['Bras & Panties','Nightwear & Robes','Loungewear','Shapewear'],
-      'Activewear':['Sports Bras','Leggings & Tights','Gym Tops'],
-      'Accessories':['Handbags','Jewellery','Scarves & Stoles','Belts']
-    }},
-    Kids:{icon:'🧒',title:"Kids' Wear",desc:'Boys, girls, infants & toddlers, nightwear and innerwear.',groups:{
-      'Boys (2–14 Years)':['T-Shirts & Polos','Shirts','Jeans & Trousers','Shorts','Ethnic Wear','Jackets & Sweaters'],
-      'Girls (2–14 Years)':['Dresses & Frocks','Tops & Tees','Skirts','Jeans & Leggings','Ethnic Wear (Lehengas/Kurtis)','Jackets'],
-      'Infants & Toddlers (0–2 Years)':['Onesies & Bodysuits','Rompers','Clothing Sets','Baby Sleepsuits','Bibs & Mittens'],
-      'Nightwear & Innerwear':['Pyjama Sets','Vests & Underwear']
-    }}
-  };
-  const RELATED={
-    'T-Shirts':['M001','K002'],'Polos':['M001'],'Casual Shirts':['M002','M005'],'Formal Shirts':['M002','M005'],'Jackets':['M004'],'Jeans':['J001','J002'],'Trousers & Chinos':['M003'],'Sports T-Shirts':['M001'],'Kurtas & Kurta Sets':['M002'],'Kids T-Shirts':['K002'],'Shirts':['M002','M005'],'Jeans & Trousers':['J001','M003'],'Tops & Tees':['L001'],'Shirts & Blouses':['L001'],'Bras & Panties':['L001','L002'],'Nightwear & Robes':['L002'],'Lingerie':['L001','L002'],'Jeans & Jeggings':['J001','J002'],'Leggings & Tights':['L002']
-  };
-  const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  function shareData(title,url){
-    const data={title:`${title} | Santosh Fashion Hub`,text:`Check this on Santosh Fashion Hub: ${title}`,url};
-    if(navigator.share){navigator.share(data).catch(()=>{});}
-    else if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast('Link copied to clipboard')).catch(()=>toast('Copy failed'))}
-    else {window.prompt('Copy this link:',url)}
-  }
-  window.sharePortal=function(key){shareData(PORTALS[key].title,location.href.split('#')[0]+'#portal-'+key.toLowerCase())};
-  window.shareSubcategory=function(key){shareData(key+' | Santosh Fashion Hub',location.href.split('#')[0]+'#subcategory-'+slug(key))};
-  window.portalOpen=function(key){
-    const p=PORTALS[key];
-    const groups=Object.entries(p.groups).map(([g,items])=>`<div class="portalGroup"><h4>${g}</h4><div class="portalChips">${items.map(x=>`<button class="portalChip" onclick="subcategoryOpen('${x.replace(/'/g,"\\'")}')">${x}<span>→</span></button>`).join('')}</div></div>`).join('');
-    const panel=`<div class="portalModalHead"><div><span class="eyebrow">${p.icon} ${p.title.toUpperCase()}</span><h2>${p.title}</h2><p>${p.desc}</p></div><button class="portalClose" onclick="portalClose()">×</button></div><div class="portalShareRow"><span>Explore all subcategories</span><button class="btn outline" onclick="sharePortal('${key}')">↗ Share this portal</button></div>${groups}`;
-    openPortalModal(panel);
-  };
-  window.subcategoryOpen=function(key){
-    const ids=RELATED[key]||[]; const matches=products.filter(p=>ids.includes(p.id)&&Number(p.stock)>0); const primary=matches[0]||null;
-    const gallery=[0,1,2,3,4].map((i)=>{
-      const visual=primary?productVisual(primary):`<div class="galleryPlaceholder"><span>${['FRONT','BACK','DETAIL','TEXTURE','STYLE'][i]}</span><b>${primary?primary.art:'📸'}</b></div>`;
-      return `<div class="portalPhoto"><div class="portalPhotoVisual">${visual}</div><div class="portalPhotoBar"><small>${['Front view','Back view','Fabric / texture','Close detail','Style / extra view'][i]}</small><button onclick="sharePhoto('${key.replace(/'/g,"\\'")}','${i}')">↗ Share</button></div></div>`;
-    }).join('');
-    const productsHtml=matches.length?matches.map(p=>`<button class="portalProduct" onclick="portalProductDetail('${p.id}')"><span>${productVisual(p)}</span><b>${p.name}</b><small>${money(p.price)} • ${p.id}</small></button>`).join(''):`<div class="portalNoProduct"><b>📦 Product details will appear here</b><span>This subcategory is ready. Add the actual item/photo later from Product Manager.</span></div>`;
-    const panel=`<div class="portalModalHead"><div><span class="eyebrow">SUBCATEGORY</span><h2>${key}</h2><p>Tap any photo to share. Tap a matching product to open full details, size, stock and WhatsApp ordering.</p></div><button class="portalClose" onclick="portalClose()">×</button></div><div class="portalShareRow"><span>5-photo product gallery</span><button class="btn outline" onclick="shareSubcategory('${key.replace(/'/g,"\\'")}')">↗ Share portal</button></div><div class="portalPhotos">${gallery}</div><div class="portalProducts"><h3>Available products</h3><div class="portalProductGrid">${productsHtml}</div></div>`;
-    openPortalModal(panel);
-  };
-  window.sharePhoto=function(key,i){const url=location.href.split('#')[0]+'#subcategory-'+slug(key)+'-photo-'+i;shareData(`${key} – ${['Front view','Back view','Fabric / texture','Close detail','Style / extra view'][i]}`,url)};
-  window.portalProductDetail=function(id){closePortalModal();setTimeout(()=>quickView(id),80)};
-  function openPortalModal(html){
-    let el=document.getElementById('fashionPortalModal'); if(!el){el=document.createElement('div');el.id='fashionPortalModal';el.className='fashionPortalModal';document.body.appendChild(el);}
-    el.innerHTML=`<div class="fashionPortalOverlay" onclick="portalClose()"></div><div class="fashionPortalCard"><div class="fashionPortalScroll">${html}</div></div>`;el.classList.add('open');
-  }
-  window.portalClose=function(){document.getElementById('fashionPortalModal')?.classList.remove('open')};
-  function injectPortal(){
-    if(document.getElementById('fashionExplorer'))return;
-    const css=document.createElement('style');css.textContent=`
-      .fashionExplorer{margin:10px auto 30px;max-width:1200px;padding:24px}.fashionExplorerIntro{max-width:850px;margin-bottom:18px}.fashionExplorerIntro p{line-height:1.7}.fashionExplorerGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.fashionPortalCardTile{border:1px solid rgba(255,255,255,.12);border-radius:22px;overflow:hidden;background:rgba(255,255,255,.045);cursor:pointer;transition:transform .2s,box-shadow .2s}.fashionPortalCardTile:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.2)}.fashionPortalCardTile .tileVisual{height:180px;display:flex;align-items:center;justify-content:center;font-size:70px;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.14),rgba(255,255,255,.025))}.fashionPortalCardTile .tileBody{padding:18px}.fashionPortalCardTile h3{margin:0 0 7px}.fashionPortalCardTile p{margin:0 0 14px;line-height:1.5;opacity:.82}.tileActions{display:flex;gap:8px}.tileActions button{flex:1}.fashionPortalModal{display:none;position:fixed;inset:0;z-index:10000}.fashionPortalModal.open{display:block}.fashionPortalOverlay{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}.fashionPortalCard{position:absolute;inset:4vh 4vw;max-width:1200px;margin:auto;border:1px solid rgba(255,255,255,.15);border-radius:26px;background:#101522;box-shadow:0 30px 100px rgba(0,0,0,.5);overflow:hidden}.fashionPortalScroll{height:100%;overflow:auto;padding:28px}.portalModalHead{display:flex;justify-content:space-between;gap:20px}.portalModalHead h2{margin:4px 0 8px}.portalModalHead p{max-width:780px;line-height:1.6;opacity:.82}.portalClose{border:0;background:rgba(255,255,255,.08);color:inherit;border-radius:12px;width:42px;height:42px;font-size:26px;cursor:pointer}.portalShareRow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 18px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1)}.portalGroup{margin:18px 0}.portalGroup h4{margin:0 0 10px}.portalChips{display:flex;flex-wrap:wrap;gap:9px}.portalChip{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:inherit;border-radius:999px;padding:10px 13px;cursor:pointer}.portalChip span{margin-left:7px;opacity:.7}.portalPhotos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.portalPhoto{border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.035)}.portalPhotoVisual{height:210px;display:flex;align-items:center;justify-content:center}.portalPhotoVisual .productPhoto{width:100%;height:100%;object-fit:contain}.galleryPlaceholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:.7}.galleryPlaceholder b{font-size:52px}.portalPhotoBar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px}.portalPhotoBar button{border:0;background:transparent;color:inherit;text-decoration:underline;cursor:pointer}.portalProducts{margin-top:24px}.portalProductGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.portalProduct{display:grid;grid-template-columns:64px 1fr;gap:10px;text-align:left;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px;background:rgba(255,255,255,.035);color:inherit;cursor:pointer}.portalProduct>span{width:64px;height:64px;display:flex;align-items:center;justify-content:center}.portalProduct .productPhoto{width:64px;height:64px;object-fit:contain}.portalProduct b{align-self:end}.portalProduct small{grid-column:2}.portalNoProduct{padding:22px;border:1px dashed rgba(255,255,255,.2);border-radius:14px;display:grid;gap:6px}.portalNoProduct span{opacity:.75}
-      @media(max-width:900px){.fashionExplorerGrid{grid-template-columns:1fr}.portalPhotos{grid-template-columns:repeat(2,minmax(0,1fr))}.portalProductGrid{grid-template-columns:1fr}.fashionPortalCard{inset:2vh 2vw}.fashionPortalCard .fashionPortalScroll{padding:18px}}
-      @media(max-width:520px){.portalPhotos{grid-template-columns:1fr}.portalShareRow{align-items:flex-start;flex-direction:column}.fashionPortalCard{inset:0;border-radius:0}.fashionPortalScroll{padding:16px}.tileActions{flex-direction:column}}
-    `;document.head.appendChild(css);
-    const s=document.createElement('section');s.id='fashionExplorer';s.className='fashionExplorer';s.innerHTML=`<div class="fashionExplorerIntro"><span class="eyebrow">FASHION EXPLORER</span><h2>Shop by Portal</h2><p>Click Men's, Women's or Kids' Wear. Then choose a subcategory such as <b>Shirts → Formal Shirts</b>. Each subcategory opens a 5-photo gallery, share buttons and matching product details.</p></div><div class="fashionExplorerGrid">${Object.entries(PORTALS).map(([k,p])=>`<article class="fashionPortalCardTile"><div class="tileVisual">${p.icon}</div><div class="tileBody"><h3>${p.title}</h3><p>${p.desc}</p><div class="tileActions"><button class="btn primary" onclick="portalOpen('${k}')">Open Portal →</button><button class="btn outline" onclick="sharePortal('${k}')">↗ Share</button></div></div></article>`).join('')}</div>`;
-    const target=document.getElementById('products');target?.parentElement?.insertBefore(s,target);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',injectPortal);else injectPortal();
-})();
+(function injectCollectionReadabilityFix(){const css=`
+.collectionHead{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;overflow:visible}
+.collectionHead>div{min-width:0;flex:1 1 300px}
+.collectionHead .tag{position:static;display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.5;flex:0 1 360px;text-align:center}
+.collectionBlock{position:relative;overflow:visible}
+.collectionBlock .collectionHead{padding:0 2px}
+.collectionBlock .eyebrow,.collectionBlock h3,.collectionBlock .tag,.collectionGroup h4,.collectionGroup li{opacity:1!important;filter:none!important;text-shadow:none!important}
+@media(max-width:800px){.collectionHead>div{flex-basis:100%}.collectionHead .tag{width:100%;flex-basis:100%;text-align:left;margin-top:4px}}
+@media(max-width:520px){.collectionHead{display:block}.collectionHead .tag{margin-top:9px;font-size:11px;padding:7px 9px}.collectionBlock{padding:18px}.collectionBlock .collectionHead h3{font-size:22px}}
+`;const style=document.createElement('style');style.id='sfh-readability-fix';style.textContent=css;document.head.appendChild(style)})();
