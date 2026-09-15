@@ -1,0 +1,46 @@
+name: SFH Simple Single Photo Mode
+
+on:
+  push:
+    paths:
+      - 'admin-single-photo.html'
+      - '.github/workflows/sfh-simple-photo-mode.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  enable-simple-mode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove cloud/local gallery adapters from storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          import re
+          s=re.sub(r'<script src=["\'](?:\./)?sfh-idb-gallery\.js["\']></script>', '', s)
+          s=re.sub(r'<script src=["\'](?:\./)?cloudinary-config\.js["\']></script><script src=["\'](?:\./)?sfh-cloudinary-storefront\.js["\']></script>', '', s)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Add simple photo manager link to admin
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          s=p.read_text(encoding='utf-8')
+          link='<a class="btn gold" href="./admin-single-photo.html">📸 Simple Photo Upload</a>'
+          if link not in s:
+              s=s.replace('</div>',''+link+'</div>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit simple mode
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html admin.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Restore simple single-photo storefront mode'
+          git push
