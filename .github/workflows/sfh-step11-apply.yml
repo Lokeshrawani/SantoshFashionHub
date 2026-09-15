@@ -1,0 +1,46 @@
+name: SFH Step 11 - Firebase bridge
+on:
+  push:
+    paths:
+      - 'firebase-config.js'
+      - 'sfh-step11-firebase.js'
+      - '.github/workflows/sfh-step11-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject Firebase scripts into storefront
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          markers=['<script src="./firebase-config.js"></script>','<script src="./sfh-step11-firebase.js"></script>']
+          for m in markers:
+              if m not in s:
+                  s=s.replace('</body>',m+'\n</body>')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Inject Firebase bridge into order history
+        run: |
+          if [ -f sfh-step8-orders.html ]; then
+            python3 - <<'PY'
+            from pathlib import Path
+            p=Path('sfh-step8-orders.html')
+            s=p.read_text(encoding='utf-8')
+            markers=['<script src="./firebase-config.js"></script>','<script src="./sfh-step11-firebase.js"></script>']
+            for m in markers:
+                if m not in s: s=s.replace('</body>',m+'\n</body>')
+            p.write_text(s,encoding='utf-8')
+            PY
+          fi
+      - name: Commit patched pages
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sfh-step8-orders.html 2>/dev/null || true
+          git diff --cached --quiet || git commit -m 'Step 11: connect storefront to Firebase bridge'
+          git push
