@@ -52,3 +52,25 @@ updateCounts();renderProducts();renderCart();
 @media(max-width:800px){.collectionHead>div{flex-basis:100%}.collectionHead .tag{width:100%;flex-basis:100%;text-align:left;margin-top:4px}}
 @media(max-width:520px){.collectionHead{display:block}.collectionHead .tag{margin-top:9px;font-size:11px;padding:7px 9px}.collectionBlock{padding:18px}.collectionBlock .collectionHead h3{font-size:22px}}
 `;const style=document.createElement('style');style.id='sfh-readability-fix';style.textContent=css;document.head.appendChild(style)})();
+
+(function initSubcategoryProductLinks(){
+  const groups=[...document.querySelectorAll('.collectionGroup')];
+  const clean=s=>s.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  const rules=[
+    [/t shirts?|tees?|polos?/,'T-Shirt'],[/jeans|jegging/,'Jeans'],[/jackets?|blazers?|sweaters?|hoodies?|sweatshirts?/,'Jacket'],[/shirts?/,'Men'],[/trousers?|chinos?|pants?|shorts?|joggers?/,'Men'],[/innerwear|vests?|briefs?|trunks?|boxers?|panties|bras|lingerie|nightwear|loungewear|underwear/,'Ladies'],[/dresses?|frocks?|tops?/,'Ladies'],[/kids|boys|girls|infants|toddlers|baby/,'Kids'],[/ethnic|kurta|kurtis|sarees?|lehengas?|sherwanis?|nehru/,'Men'],[/sports|activewear|gym|tracksuits?|leggings?|tights?/,'Kids'],[/accessories|belts?|wallets?|ties?|caps?|socks?|handbags?|jewellery|scarves?/,'All']
+  ];
+  function targetFor(label,groupName){
+    const t=clean(label);
+    for(const [rx,val] of rules){if(rx.test(t)) return val==='All'?(clean(groupName)==='womens collection'?'Ladies':clean(groupName)==='kids collection'?'Kids':'Men'):val}
+    const g=clean(groupName);return g.includes('women')||g.includes('ladies')?'Ladies':g.includes('kids')?'Kids':'Men';
+  }
+  groups.forEach(g=>{
+    const groupName=g.closest('.collectionBlock')?.querySelector('h3')?.textContent||'Men';
+    g.querySelectorAll('li').forEach(li=>{
+      li.setAttribute('role','button');li.tabIndex=0;li.dataset.subcategory=li.textContent.trim();li.title='View matching products and stock';
+      const go=()=>{const val=targetFor(li.dataset.subcategory,groupName);setCategory(val);document.querySelectorAll('.collectionGroup li').forEach(x=>x.classList.remove('sfh-sub-active'));li.classList.add('sfh-sub-active');toast('Showing '+li.dataset.subcategory+' • '+val+' products')};
+      li.addEventListener('click',go);li.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})
+    });
+  });
+  const css=document.createElement('style');css.textContent=`.collectionGroup li{cursor:pointer;transition:transform .15s,opacity .15s}.collectionGroup li:hover,.collectionGroup li:focus{opacity:1;transform:translateX(3px)}.collectionGroup li.sfh-sub-active{font-weight:900;text-decoration:underline;text-underline-offset:4px}`;document.head.appendChild(css);
+})();
