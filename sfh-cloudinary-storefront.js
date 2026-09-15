@@ -15,7 +15,8 @@
   function visual(p){
     const u=url(p.id,0);
     if(!u)return `<div class="art">${p.art||'👕'}</div>`;
-    return `<img class="productPhoto cloudProductPhoto" src="${u}" alt="${String(p.name||'Product').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid"><div class="art cloudFallback">${p.art||'👕'}</div>`;
+    const alt=String(p.name||'Product').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="cloudImageWrap"><img class="productPhoto cloudProductPhoto" src="${u}" alt="${alt}" loading="lazy" onerror="this.remove()"><div class="art cloudFallback">${p.art||'👕'}</div></div>`;
   }
   window.sfhCloudinary={configured:ready,url,visual};
   function rerender(){
