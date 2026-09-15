@@ -1,0 +1,32 @@
+name: SFH Step 2 Fashion Portal
+on:
+  push:
+    paths:
+      - 'sfh-portal-step2.js'
+      - '.github/workflows/sfh-step2-portal.yml'
+permissions:
+  contents: write
+jobs:
+  patch-portal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Step 2 portal script to storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          add='<script src="./sfh-portal-step2.js"></script>'
+          if add not in s:
+              s=s.replace('</body>',add+'</body>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit portal integration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Enable Step 2 complete fashion portal'
+          git push
