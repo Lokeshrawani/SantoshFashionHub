@@ -1,0 +1,47 @@
+name: Enable shared Cloudinary product photos
+on:
+  push:
+    paths:
+      - 'cloudinary-config.js'
+      - 'sfh-cloudinary-storefront.js'
+      - 'admin-cloudinary.html'
+      - '.github/workflows/sfh-enable-cloudinary.yml'
+permissions:
+  contents: write
+jobs:
+  patch-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add shared photo scripts to storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='</body>'
+          add='<script src="./cloudinary-config.js"></script><script src="./sfh-cloudinary-storefront.js"></script>'
+          if add not in s:
+              s=s.replace(marker,add+marker,1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Add shared photo manager link to admin
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          s=p.read_text(encoding='utf-8')
+          anchor='<a class="btn gold" href="./admin-multi-photo.html">Open Advanced Photo Manager ↗</a>'
+          link='<a class="btn gold" href="./admin-cloudinary.html">Shared Cloud Photo Upload ↗</a>'
+          if link not in s:
+              if anchor in s: s=s.replace(anchor,anchor+link,1)
+              else: s=s.replace('</div>','<a class="btn gold" href="./admin-cloudinary.html">Shared Cloud Photo Upload ↗</a></div>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit patches
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html admin.html
+          git diff --cached --quiet || git commit -m 'Enable shared Cloudinary photo system'
+          git push
