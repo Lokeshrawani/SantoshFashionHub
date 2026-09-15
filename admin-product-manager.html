@@ -39,5 +39,6 @@ function card(p,i){const group=p.group||'Men',subs=DATA[group]?.subs||DATA.Men.s
 function render(){document.getElementById('deptFilter').value=dept;const arr=filtered();document.getElementById('grid').innerHTML=arr.length?arr.map((p)=>{const i=products.indexOf(p);return card(p,i)}).join(''):'<div class="empty">No products match this filter.</div>';renderChips()}
 document.getElementById('search').addEventListener('input',e=>{search=e.target.value;render()});document.getElementById('deptFilter').addEventListener('change',e=>{dept=e.target.value;chip='All';render()});load();
 </script>
+<a class="btn gold" href="./sfh-step8-admin-orders.html">📦 Order Manager ↗</a>
 </body>
 </html>
