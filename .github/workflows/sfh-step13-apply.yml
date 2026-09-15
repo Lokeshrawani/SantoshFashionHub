@@ -1,0 +1,50 @@
+name: SFH Step 13 - Central Firestore Orders
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sfh-step13-firestore-orders.js'
+      - 'sfh-step13-orders.html'
+      - 'sfh-step13-admin-orders.html'
+      - '.github/workflows/sfh-step13-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attach Step 13 bridge to storefront
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script type="module" src="./sfh-step13-firestore-orders.js"></script>'
+          if tag not in s:
+              s=s.replace('</body>', tag+'\n</body>')
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Attach central order links to admin dashboard
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('sfh-step7-admin-dashboard.html')
+          if p.exists():
+              s=p.read_text(encoding='utf-8')
+              marker='<button class="btn gold" onclick="exportProducts()">⬇ Export JSON</button>'
+              link='<a class="btn gold" href="./sfh-step13-admin-orders.html">📦 Online Orders</a>'
+              if 'sfh-step13-admin-orders.html' not in s:
+                  s=s.replace(marker,marker+link)
+                  p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit Step 13 integration
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sfh-step7-admin-dashboard.html
+          git diff --cached --quiet || git commit -m 'Attach Step 13 central Firestore orders'
+          git push
