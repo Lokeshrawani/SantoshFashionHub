@@ -1,0 +1,33 @@
+name: SFH Step 3 Subcategory Product Filtering
+on:
+  push:
+    paths:
+      - 'sfh-step3-subcategory.js'
+      - 'sfh-step3-fix.js'
+      - '.github/workflows/sfh-step3-deploy.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Step 3 scripts on storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          add='<script src="./sfh-step3-subcategory.js"></script><script src="./sfh-step3-fix.js"></script>'
+          if add not in s:
+              s=s.replace('</body>',add+'</body>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit Step 3 storefront patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Enable Step 3 subcategory product filters'
+          git push
