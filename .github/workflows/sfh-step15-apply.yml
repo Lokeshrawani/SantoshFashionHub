@@ -1,0 +1,40 @@
+name: SFH Step 15 - Profile & Order Tracking
+on:
+  push:
+    paths:
+      - 'sfh-step15-profile-tracking.js'
+      - 'sfh-step15-profile-tracking.css'
+      - '.github/workflows/sfh-step15-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject Step 15 into storefront
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          css='<link rel="stylesheet" href="./sfh-step15-profile-tracking.css">'
+          js='<script src="./sfh-step15-profile-tracking.js"></script>'
+          if css not in s and '</head>' in s: s=s.replace('</head>',css+'</head>',1)
+          if js not in s and '</body>' in s: s=s.replace('</body>',js+'</body>',1)
+          marker='<a href="./sfh-step15-account.html">👤 My Account</a>'
+          nav='<a href="./sfh-step8-orders.html">My Orders</a>'
+          if marker not in s and nav in s: s=s.replace(nav,nav+marker,1)
+          elif marker not in s and '</nav>' in s: s=s.replace('</nav>',marker+'</nav>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit storefront integration
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Integrate Step 15 customer profile and tracking'
+          git push
