@@ -1,0 +1,37 @@
+name: Enable SFH Firebase Store Sync
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject Firebase store bridge
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('script.js')
+          s=p.read_text(encoding='utf-8')
+          marker='/* SFH_FIREBASE_STORE_BRIDGE */'
+          code="\n\n/* SFH_FIREBASE_STORE_BRIDGE */\nimport('./sfh-firebase-store-bridge.js').catch(console.warn);\n"
+          if marker not in s:
+              p.write_text(s.rstrip()+code,encoding='utf-8')
+          i=Path('index.html')
+          h=i.read_text(encoding='utf-8')
+          tag='<script type="module" src="./sfh-firebase-store-bridge.js?v=2"></script>'
+          if 'sfh-firebase-store-bridge.js' not in h:
+              h=h.replace('</head>',tag+'\n</head>',1)
+              i.write_text(h,encoding='utf-8')
+          PY
+      - name: Commit sync changes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add script.js index.html
+          if git diff --cached --quiet; then echo 'No changes needed'; else git commit -m 'Enable Firebase product sync on storefront' && git push; fi
