@@ -1,0 +1,34 @@
+name: SFH Step 17 Firestore Sync
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'sfh-step17-firestore-sync.js'
+      - 'sfh-step17-firestore-sync.css'
+      - 'sfh-step17-firestore-sync.html'
+      - 'sfh-step17-apply.yml'
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attach Step 17 sync to storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script src="./sfh-step17-firestore-sync.js"></script>'
+          if marker not in s:
+              s=s.replace('</body>', marker+'</body>')
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit storefront integration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'chore: integrate Step 17 Firestore sync'
+          git push
