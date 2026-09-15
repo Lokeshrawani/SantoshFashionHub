@@ -1,0 +1,48 @@
+name: SFH Apply Simple Photo Mode
+on:
+  push:
+    paths:
+      - 'sfh-simple-mode-trigger.txt'
+      - 'sfh-simple-photo.js'
+      - '.github/workflows/sfh-simple-mode-apply.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch simple admin and storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          # index: add simple bridge once. Leave existing scripts untouched; the bridge uses a separate key.
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          add='<script src="./sfh-simple-photo.js"></script>'
+          if add not in s:
+              s=s.replace('</body>',add+'</body>',1)
+              p.write_text(s,encoding='utf-8')
+          # simple admin: save/read a separate image map that old IndexedDB adapters never touch.
+          p=Path('admin-single-photo.html'); s=p.read_text(encoding='utf-8')
+          s=s.replace("const KEY='sfh-products';let products=[];let q='';", "const KEY='sfh-products';const IMAGE_KEY='sfh-single-images';let products=[];let q='';")
+          s=s.replace("products=products.map((p,i)=>({...p,id:p.id||'P'+(i+1),image:typeof p.image==='string'?p.image:''}));render()", "products=products.map((p,i)=>({...p,id:p.id||'P'+(i+1),image:typeof p.image==='string'?p.image:''}));let im={};try{im=JSON.parse(localStorage.getItem(IMAGE_KEY)||'{}')}catch(e){im={}};products=products.map(p=>im[p.id]?{...p,image:im[p.id]}:p);render()")
+          s=s.replace("localStorage.setItem(KEY,JSON.stringify(products));return true", "localStorage.setItem(KEY,JSON.stringify(products));const map={};products.forEach(p=>{if(typeof p.image==='string'&&p.image.startsWith('data:image/'))map[p.id]=p.image});localStorage.setItem(IMAGE_KEY,JSON.stringify(map));return true")
+          p.write_text(s,encoding='utf-8')
+          # admin: add easy link once near the start of the document so it is available immediately.
+          p=Path('admin.html'); s=p.read_text(encoding='utf-8')
+          link='<a class="btn gold" href="./admin-single-photo.html">📸 Simple Photo Upload</a>'
+          if link not in s:
+              pos=s.find('<div class="topbar">')
+              if pos>=0:
+                  end=s.find('</div>',pos)
+                  if end>=0:s=s[:end+6]+link+s[end+6:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit patches
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html admin.html admin-single-photo.html sfh-simple-photo.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Enable simple single-photo mobile admin mode'
+          git push
