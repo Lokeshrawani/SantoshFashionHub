@@ -1,0 +1,37 @@
+name: Apply SFH Step 14
+on:
+  push:
+    paths:
+      - 'sfh-step14-account.js'
+      - 'sfh-step14-account.css'
+      - '.github/workflows/sfh-step14-apply.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Step 14 assets to storefront
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          css='<link rel="stylesheet" href="./sfh-step14-account.css">'
+          js='<script src="./sfh-step14-account.js"></script>'
+          changed=False
+          if css not in s:
+              s=s.replace('</head>',css+'\n</head>',1); changed=True
+          if js not in s:
+              s=s.replace('</body>',js+'</body>',1); changed=True
+          if changed:
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Step 14: integrate customer account into storefront'
+          git push
