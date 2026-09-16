@@ -1,69 +1,14 @@
-name: SFH Photo Enhancement
+name: SFH Photo Enhancement (manual legacy)
 
+# Disabled automatic patching so it cannot overwrite the live photo-fit styling.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  enhance:
-    if: github.event.head_commit.message != 'Enhance Santosh Fashion Hub photo portals'
+  notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Add high quality fashion photo portals
-        shell: python
-        run: |
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-
-          css = r'''
-          <style id="sfh-photo-enhancement">
-          .sfh-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;transition:transform .45s ease,filter .45s ease}.photoSlot{position:relative;overflow:hidden;padding:0!important;min-height:190px;background:#111827!important;border:0!important;box-shadow:0 12px 35px rgba(11,16,32,.12)}.photoSlot:hover .sfh-photo{transform:scale(1.06);filter:saturate(1.08)}.photoCaption{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 13px;color:#fff;text-align:left;font-size:13px;font-weight:900;background:linear-gradient(transparent,rgba(5,8,18,.86));letter-spacing:.2px}.categoryRail button{padding:0!important;overflow:hidden;min-height:205px;position:relative;text-align:left}.categoryRail button .sfh-cat-photo{width:100%;height:135px;object-fit:cover;display:block}.categoryRail button i{display:none}.categoryRail button b,.categoryRail button small{padding-left:15px}.categoryRail button b{margin-top:12px}.categoryRail button small{margin-bottom:14px}.photoShowcase{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.photoShowcase .sfh-tile{position:relative;height:210px;border-radius:18px;overflow:hidden;background:#111827;box-shadow:0 14px 35px rgba(11,16,32,.12)}.sfh-tile img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.sfh-tile:hover img{transform:scale(1.05)}.sfh-tile span{position:absolute;left:0;right:0;bottom:0;padding:35px 13px 12px;color:#fff;font-size:12px;font-weight:900;background:linear-gradient(transparent,rgba(5,8,18,.88))}@media(max-width:800px){.photoShowcase{grid-template-columns:1fr 1fr}.categoryRail{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){.photoShowcase{grid-template-columns:1fr}.categoryRail{grid-template-columns:repeat(2,1fr)}.categoryRail button{min-height:185px}.categoryRail button .sfh-cat-photo{height:115px}}
-          </style>
-          '''
-
-          js = r'''
-          <script id="sfh-photo-enhancement">
-          (() => {
-            const img=(url,alt,cls='sfh-photo')=>{const e=document.createElement('img');e.src=url;e.alt=alt;e.loading='lazy';e.className=cls;return e};
-            const base='https://images.unsplash.com/';
-            const photos={
-              men:[base+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',base+'photo-1593032465171-8e4f6c4b7c34?auto=format&fit=crop&w=1200&q=88',base+'photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=88',base+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88'],
-              women:[base+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',base+'photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=88',base+'photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=88',base+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88'],
-              kids:[base+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88',base+'photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&w=1200&q=88',base+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88',base+'photo-1566454544259-f4b94c3d7585?auto=format&fit=crop&w=1200&q=88'],
-              jeans:base+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',
-              tshirt:base+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',
-              jacket:base+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'
-            };
-            document.querySelectorAll('.categoryRail button').forEach((b,i)=>{const key=['men','jeans','kids','women','jacket','tshirt'][i];const u=typeof photos[key]==='string'?photos[key]:photos[key][0];const im=img(u,b.querySelector('b')?.textContent||'Fashion category','sfh-cat-photo');b.prepend(im);});
-            const sets=[['men',photos.men],['women',photos.women],['kids',photos.kids]];
-            document.querySelectorAll('.collectionBlock').forEach((block,idx)=>{const set=sets[idx];if(!set)return;block.querySelectorAll('.photoSlot').forEach((slot,i)=>{slot.textContent='';slot.appendChild(img(set[1][i],set[0]+' fashion collection photo'));const cap=document.createElement('div');cap.className='photoCaption';cap.textContent=set[0]==='men'?['Shirts & T-Shirts','Jeans & Bottomwear','Jackets & Layers','Smart & Casual'][i]:set[0]==='women'?['Western Wear','Ethnic & Traditional','Lifestyle & Comfort','Modern Collections'][i]:['Boys Fashion','Girls Fashion','Infants & Toddlers','Kids Nightwear'][i];slot.appendChild(cap);});});
-            const productMap={
-              'Jeans':photos.jeans,'T-Shirt':photos.tshirt,'Jacket':photos.jacket,'Men':photos.men[0],'Ladies':photos.women[0],'Kids':photos.kids[0]
-            };
-            document.querySelectorAll('.collectionGroup').forEach(group=>{const h=group.querySelector('h4');if(!h)return;const name=h.textContent.trim();let u=photos.men[0];if(/Western|Lingerie|Activewear|Accessories/.test(name))u=photos.women[0];if(/Boys|Girls|Infants|Nightwear/.test(name))u=photos.kids[0];const tile=document.createElement('div');tile.className='photoShowcase';tile.innerHTML='<div class="sfh-tile"></div>';tile.querySelector('.sfh-tile').appendChild(img(u,name));group.parentElement.insertBefore(tile,group);});
-          })();
-          </script>
-          '''
-
-          if 'id="sfh-photo-enhancement"' not in s:
-              s=s.replace('</head>',css+'\n</head>')
-          if 'id="sfh-photo-enhancement"' not in s.split('</body>')[0]:
-              s=s.replace('</body>',js+'\n</body>')
-          s=s.replace('The four photo slots in each department are reserved for the original product images we will create later.','Each department now has a visual fashion gallery. Replace any sample image with your own Santosh Fashion Hub product photo when available.')
-          s=s.replace('📌 Next phase: replace the four placeholders in each department with original Santosh Fashion Hub fashion images and connect every subcategory to products and stock.','📸 Visual fashion galleries are active. For product-specific photos, use Product Manager to add your real stock images.')
-          p.write_text(s,encoding='utf-8')
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git diff --cached --quiet && exit 0
-          git commit -m "Enhance Santosh Fashion Hub photo portals"
-          git push
+      - run: echo "Legacy photo enhancer is disabled. Store photo styling is maintained in the live frontend code."
