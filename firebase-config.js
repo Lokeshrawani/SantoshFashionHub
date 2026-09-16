@@ -10,14 +10,20 @@ window.SFH_FIREBASE_CONFIG = {
   measurementId: "G-PC8SF81YQV"
 };
 
-// Cross-device fashion-portal sync + universal full-photo fit/quality + final storefront UI fix.
+// Load non-critical Firebase/photo enhancement layers after the initial storefront paints.
+// The main product UI is available from localStorage immediately; these layers then add
+// cross-device photo sync and visual compatibility without blocking first render.
 (()=>{
   const load=()=>{
-    import('./sfh-portal-firebase-sync.js?v=3').catch(e=>console.warn('SFH portal sync load:',e));
-    import('./sfh-photo-fit-quality-v1.js?v=2').catch(e=>console.warn('SFH photo quality load:',e));
-    import('./sfh-final-store-visual-fix.js?v=1').catch(e=>console.warn('SFH visual fix load:',e));
-    import('./sfh-store-final-fix.js?v=1').catch(e=>console.warn('SFH store final fix load:',e));
+    const imports=[
+      './sfh-portal-firebase-sync.js?v=3',
+      './sfh-photo-fit-quality-v1.js?v=2',
+      './sfh-final-store-visual-fix.js?v=1',
+      './sfh-store-final-fix.js?v=2'
+    ];
+    imports.forEach(src=>import(src).catch(e=>console.warn('SFH deferred layer:',src,e)));
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,0),{once:true});
-  else setTimeout(load,0);
+  const run=()=>setTimeout(load,1400);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});
+  else run();
 })();
