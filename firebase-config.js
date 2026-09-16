@@ -9,3 +9,10 @@ window.SFH_FIREBASE_CONFIG = {
   appId: "1:318770842041:web:9144ddff42a983857b0e68",
   measurementId: "G-PC8SF81YQV"
 };
+
+// Cross-device fashion-portal photo sync. This loads safely on both Store and Admin pages.
+(()=>{
+  const load=()=>import('./sfh-portal-firebase-sync.js?v=1').catch(e=>console.warn('SFH portal sync load:',e));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,0),{once:true});
+  else setTimeout(load,0);
+})();
