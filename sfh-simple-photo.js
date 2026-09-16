@@ -1,13 +1,43 @@
-/* Santosh Fashion Hub — default catalog photo bridge */
+/* Santosh Fashion Hub — real fashion photo bridge */
 (function(){
+  const U='https://images.unsplash.com/';
+  const P={
+    men:U+'photo-1768696082704-c4e5593d9f27?auto=format&fit=crop&w=1200&q=85',
+    ladies:U+'photo-1692992193981-d3d92fabd9cb?auto=format&fit=crop&w=1200&q=85',
+    kids:U+'photo-1744807561461-00bbe2419a65?auto=format&fit=crop&w=1200&q=85',
+    jeans:U+'photo-1707400131124-a688ed508a95?auto=format&fit=crop&w=1200&q=85',
+    tshirt:U+'photo-1604534609306-00cdac972ad2?auto=format&fit=crop&w=1200&q=85',
+    shirt:U+'photo-1715865717728-298d1925e4c6?auto=format&fit=crop&w=1200&q=85',
+    trouser:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',
+    jacket:U+'photo-1604534609306-00cdac972ad2?auto=format&fit=crop&w=1200&q=85',
+    ethnic:U+'photo-1572470176170-98fa8abcb741?auto=format&fit=crop&w=1200&q=85',
+    active:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',
+    inner:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',
+    accessories:U+'photo-1707400131124-a688ed508a95?auto=format&fit=crop&w=1200&q=85'
+  };
   const PRODUCT_PHOTOS={
-    M001:'assets/products/mens-premium-tshirt.svg',M002:'assets/products/mens-casual-shirt.svg',J001:'assets/products/mens-denim-jeans.svg',M003:'assets/products/mens-formal-trouser.svg',M004:'assets/products/mens-stylish-jacket.svg',K001:'assets/products/kids-trendy-wear.svg',K002:'assets/products/kids-tshirt.svg',L001:'assets/products/ladies-comfort-collection.svg',M005:'assets/products/mens-everyday-shirt.svg',J002:'assets/products/mens-comfort-denim.svg',K003:'assets/products/kids-casual-set.svg',L002:'assets/products/ladies-comfort-pack.svg'
+    M001:P.tshirt,M002:P.shirt,J001:P.jeans,M003:P.trouser,M004:P.jacket,
+    K001:P.kids,K002:P.kids,L001:P.ladies,M005:P.shirt,J002:P.jeans,
+    K003:P.kids,L002:P.ladies
   };
   const COLLECTION_PHOTOS=[
-    ['Men','assets/products/mens-casual-shirt.svg','Men’s Wear'],['Ladies','assets/products/ladies-comfort-collection.svg','Women’s Wear'],['Kids','assets/products/kids-trendy-wear.svg','Kids’ Wear'],['Jeans','assets/products/mens-denim-jeans.svg','Jeans'],['T-Shirt','assets/products/mens-premium-tshirt.svg','T-Shirts'],['Shirt','assets/products/mens-everyday-shirt.svg','Shirts'],['Trouser','assets/products/mens-formal-trouser.svg','Trousers'],['Jacket','assets/products/mens-stylish-jacket.svg','Jackets'],['Ethnic','assets/products/ladies-comfort-pack.svg','Ethnic Wear'],['Activewear','assets/products/kids-casual-set.svg','Activewear'],['Innerwear','assets/products/ladies-comfort-pack.svg','Innerwear'],['Accessories','assets/products/mens-stylish-jacket.svg','Accessories']
+    ['Men',P.men,'Men’s Wear'],['Ladies',P.ladies,'Women’s Wear'],['Kids',P.kids,'Kids’ Wear'],
+    ['Jeans',P.jeans,'Jeans'],['T-Shirt',P.tshirt,'T-Shirts'],['Shirt',P.shirt,'Shirts'],
+    ['Trouser',P.trouser,'Trousers'],['Jacket',P.jacket,'Jackets'],['Ethnic',P.ethnic,'Ethnic Wear'],
+    ['Activewear',P.active,'Activewear'],['Innerwear',P.inner,'Innerwear'],['Accessories',P.accessories,'Accessories']
   ];
-  function updateProductStorage(){let products=[];try{products=JSON.parse(localStorage.getItem('sfh-products')||'[]')}catch(e){products=[]}if(!Array.isArray(products)||!products.length)return false;let changed=false;products=products.map(p=>{if(!p||!p.id)return p;if(!p.image&&PRODUCT_PHOTOS[p.id]){changed=true;return {...p,image:PRODUCT_PHOTOS[p.id]}}return p});if(changed)localStorage.setItem('sfh-products',JSON.stringify(products));return changed}
-  function fillCollectionPhotos(){const slots=[...document.querySelectorAll('.photoSlot')];if(!slots.length)return;slots.forEach((slot,i)=>{if(slot.dataset.sfhPhotoReady==='1')return;const item=COLLECTION_PHOTOS[i%COLLECTION_PHOTOS.length];const src=item[1],fallback=item[2];const old=slot.textContent.replace(/📸|Add image later/g,'').trim();const label=old&& !/^\d+$/.test(old)?old:fallback;slot.innerHTML=`<img src="${src}" alt="${label} — Santosh Fashion Hub" loading="lazy"><span class="photoCaption">${label}</span>`;slot.dataset.sfhPhotoReady='1'});if(!document.getElementById('sfh-default-photo-css')){const st=document.createElement('style');st.id='sfh-default-photo-css';st.textContent='.photoSlot{position:relative;overflow:hidden;padding:0!important;min-height:190px!important;background:#f4f4f4}.photoSlot img{width:100%;height:100%;min-height:190px;object-fit:cover;display:block;transition:transform .35s ease}.photoSlot:hover img{transform:scale(1.05)}.photoSlot .photoCaption{position:absolute;left:8px;right:8px;bottom:8px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.68);color:#fff;font-size:11px;font-weight:800;text-align:center;backdrop-filter:blur(5px)}';document.head.appendChild(st)}}
+  function updateProductStorage(){
+    let products=[];try{products=JSON.parse(localStorage.getItem('sfh-products')||'[]')}catch(e){products=[]}
+    if(!Array.isArray(products)||!products.length)return false;
+    let changed=false;
+    products=products.map(p=>{if(!p||!p.id)return p;if(PRODUCT_PHOTOS[p.id]&&(!p.image||String(p.image).includes('assets/products/'))){changed=true;return {...p,image:PRODUCT_PHOTOS[p.id],images:[PRODUCT_PHOTOS[p.id],...(p.images||[]).filter(x=>x&&x!==PRODUCT_PHOTOS[p.id])].slice(0,5)}}return p});
+    if(changed)localStorage.setItem('sfh-products',JSON.stringify(products));return changed;
+  }
+  function fillCollectionPhotos(){
+    const slots=[...document.querySelectorAll('.photoSlot')];if(!slots.length)return;
+    slots.forEach((slot,i)=>{if(slot.dataset.sfhPhotoReady==='1')return;const item=COLLECTION_PHOTOS[i%COLLECTION_PHOTOS.length];const src=item[1],fallback=item[2];const old=slot.textContent.replace(/📸|Add image later/g,'').trim();const label=old&&!/^\d+$/.test(old)?old:fallback;slot.innerHTML=`<img src="${src}" alt="${label} — Santosh Fashion Hub" loading="lazy" referrerpolicy="no-referrer"><span class="photoCaption">${label}</span>`;slot.dataset.sfhPhotoReady='1'});
+    if(!document.getElementById('sfh-default-photo-css')){const st=document.createElement('style');st.id='sfh-default-photo-css';st.textContent='.photoSlot{position:relative;overflow:hidden;padding:0!important;min-height:210px!important;background:#eef0f4;border-radius:14px}.photoSlot img{width:100%;height:100%;min-height:210px;object-fit:cover;display:block;transition:transform .4s ease,filter .4s ease}.photoSlot:hover img{transform:scale(1.05);filter:saturate(1.05)}.photoSlot .photoCaption{position:absolute;left:9px;right:9px;bottom:9px;padding:8px 10px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.78));color:#fff;font-size:12px;font-weight:900;text-align:center;backdrop-filter:blur(6px)}';document.head.appendChild(st)}
+  }
   function load(){const changed=updateProductStorage();fillCollectionPhotos();if(changed&&sessionStorage.getItem('sfh-default-photo-reloaded')!=='1'){sessionStorage.setItem('sfh-default-photo-reloaded','1');location.reload()}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,30));else setTimeout(load,30)
 })();
