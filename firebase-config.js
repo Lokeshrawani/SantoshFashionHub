@@ -10,9 +10,12 @@ window.SFH_FIREBASE_CONFIG = {
   measurementId: "G-PC8SF81YQV"
 };
 
-// Cross-device fashion-portal photo sync. This loads safely on both Store and Admin pages.
+// Cross-device fashion-portal sync + universal full-photo fit/quality layer.
 (()=>{
-  const load=()=>import('./sfh-portal-firebase-sync.js?v=1').catch(e=>console.warn('SFH portal sync load:',e));
+  const load=()=>{
+    import('./sfh-portal-firebase-sync.js?v=3').catch(e=>console.warn('SFH portal sync load:',e));
+    import('./sfh-photo-fit-quality-v1.js?v=2').catch(e=>console.warn('SFH photo quality load:',e));
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,0),{once:true});
   else setTimeout(load,0);
 })();
