@@ -46,4 +46,14 @@
 <script src="./sfh-step6-checkout.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./sfh-step17-firestore-sync.js"></script>
+<script id="sfh-photo-enhancement-js">
+(()=>{const U='https://images.unsplash.com/';const P={
+men:[U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',U+'photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=88',U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88',U+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88'],
+women:[U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',U+'photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=88',U+'photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=88',U+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88'],
+kids:[U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88',U+'photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&w=1200&q=88',U+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88',U+'photo-1566454544259-f4b94c3d7585?auto=format&fit=crop&w=1200&q=88'],
+jeans:U+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',tshirt:U+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',jacket:U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'};
+const mk=(u,a,c)=>{let x=document.createElement('img');x.src=u;x.alt=a;x.loading='lazy';x.className=c;return x};
+document.querySelectorAll('.categoryRail button').forEach((b,i)=>{let k=['men','jeans','kids','women','jacket','tshirt'][i],u=typeof P[k]=='string'?P[k]:P[k][0];b.prepend(mk(u,b.querySelector('b')?.textContent||'Fashion','sfh-cat-photo'))});
+[['men',P.men],['women',P.women],['kids',P.kids]].forEach((set,idx)=>{let block=document.querySelectorAll('.collectionBlock')[idx];if(!block)return;block.querySelectorAll('.photoSlot').forEach((slot,i)=>{slot.textContent='';slot.append(mk(set[1][i],set[0]+' fashion','sfh-photo'));let c=document.createElement('div');c.className='photoCaption';c.textContent=set[0]=='men'?['Shirts & T-Shirts','Jeans & Bottomwear','Jackets & Layers','Smart & Casual'][i]:set[0]=='women'?['Western Wear','Ethnic & Traditional','Lifestyle & Comfort','Modern Collections'][i]:['Boys Fashion','Girls Fashion','Infants & Toddlers','Kids Nightwear'][i];slot.append(c)})});
+})();</script>
 </body></html>
