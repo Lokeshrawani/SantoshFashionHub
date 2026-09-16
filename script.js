@@ -1,3 +1,7 @@
+/* SFH_MAIN_SCRIPT_SINGLETON_V1 */
+if(window.__SFH_MAIN_SCRIPT_LOADED__){throw new Error('SFH main script already loaded; duplicate script tag ignored.');}
+window.__SFH_MAIN_SCRIPT_LOADED__=true;
+
 const PHONE='919835567894';
 const DEFAULT_PRODUCTS=[
 {id:'M001',cat:'T-Shirt',group:'Men',name:"Men's Premium T-Shirt",price:499,old:699,art:'👕',tag:'BESTSELLER',desc:'Soft everyday style with multiple sizes & varieties.',sizes:['M','L','XL','XXL'],stock:10,image:''},
