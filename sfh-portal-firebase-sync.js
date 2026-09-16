@@ -7,7 +7,7 @@ const ADMIN_EMAIL='santoshrawani123@gmail.com';
 const KEY='sfh-collection-photos-v1';
 const FIREBASE_COLLECTION='collectionPhotoSlots';
 const PORTALS=['men','women','kids','jeans','tshirt','shirt','trouser','jacket','ethnic','activewear','innerwear','accessories'];
-const app=getApps().find(a=>a.name==='sfh-portal-firebase-sync-v2')||initializeApp(window.SFH_FIREBASE_CONFIG,{name:'sfh-portal-firebase-sync-v2'});
+const app=getApps().find(a=>a.name==='sfh-portal-firebase-sync-v3')||initializeApp(window.SFH_FIREBASE_CONFIG,{name:'sfh-portal-firebase-sync-v3'});
 const auth=getAuth(app);
 const db=getFirestore(app);
 
@@ -15,7 +15,6 @@ function readLocal(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}
 function writeLocal(v){localStorage.setItem(KEY,JSON.stringify(v));}
 function normalizePhotos(value){const arr=Array.isArray(value)?value.slice(0,4):[];while(arr.length<4)arr.push(null);return arr;}
 function localPortal(key){return normalizePhotos(readLocal()[key]);}
-function setLocalSlot(key,index,value){const all=readLocal();all[key]=normalizePhotos(all[key]);all[key][index]=value;writeLocal(all);}
 
 async function fetchRemote(){
   const snap=await getDocs(collection(db,FIREBASE_COLLECTION));
@@ -37,19 +36,10 @@ async function fetchRemote(){
 async function saveSlot(key,index){
   const value=localPortal(key)[index];
   const id=`${key}-${index+1}`;
-  if(!value){
-    await deleteDoc(doc(db,FIREBASE_COLLECTION,id));
-    return;
-  }
+  if(!value){await deleteDoc(doc(db,FIREBASE_COLLECTION,id));return;}
   const dataUrl=typeof value==='string'?value:value?.dataUrl||value?.url||'';
   if(!dataUrl)return;
-  await setDoc(doc(db,FIREBASE_COLLECTION,id),{
-    portal:key,
-    slot:index+1,
-    dataUrl,
-    updatedAt:serverTimestamp(),
-    updatedBy:ADMIN_EMAIL
-  });
+  await setDoc(doc(db,FIREBASE_COLLECTION,id),{portal:key,slot:index+1,dataUrl,updatedAt:serverTimestamp(),updatedBy:ADMIN_EMAIL});
 }
 async function savePortal(key){for(let i=0;i<4;i++)await saveSlot(key,i)}
 async function migrateAll(){
@@ -70,16 +60,16 @@ function bindAdminEvents(){
   if(window.__sfhPortalFirebaseBound)return;
   window.__sfhPortalFirebaseBound=true;
   document.addEventListener('change',e=>{
-    const input=e.target?.closest?.('[data-file]'); if(!input)return;
+    const input=e.target?.closest?.('[data-file]');if(!input)return;
     setTimeout(async()=>{
-      const [key,index]=input.dataset.file.split(':'); if(!PORTALS.includes(key))return;
+      const [key,index]=input.dataset.file.split(':');if(!PORTALS.includes(key))return;
       try{await saveSlot(key,Number(index));showAdminState(`✓ ${key} Photo ${Number(index)+1} saved to Firebase`,true)}
       catch(err){console.error(err);showAdminState(`Firebase portal save failed: ${err.message||err}`,false)}
     },1100);
   });
   document.addEventListener('click',e=>{
-    const btn=e.target?.closest?.('[data-remove],[data-demo]'); if(!btn)return;
-    const raw=btn.dataset.remove||btn.dataset.demo; const [key,index]=raw.split(':');
+    const btn=e.target?.closest?.('[data-remove],[data-demo]');if(!btn)return;
+    const raw=btn.dataset.remove||btn.dataset.demo;const [key,index]=raw.split(':');
     setTimeout(async()=>{
       if(!PORTALS.includes(key))return;
       try{await saveSlot(key,Number(index));showAdminState(`✓ ${key} Photo ${Number(index)+1} synced to Firebase`,true)}
@@ -101,6 +91,17 @@ function renderSyncedPhotos(){
   });
 }
 async function storeMode(){try{await fetchRemote();renderSyncedPhotos();setTimeout(renderSyncedPhotos,900)}catch(e){console.warn('SFH Firestore portal read:',e)}}
-async function adminMode(){bindAdminEvents();try{await fetchRemote();renderSyncedPhotos();await migrateAll();showAdminState('✓ Portal photos connected to Firebase and ready for all devices.',true)}catch(e){console.warn('SFH Firestore portal sync:',e);showAdminState(`Firebase portal sync failed: ${e.message||e}`,false)}}
+async function adminMode(){
+  bindAdminEvents();
+  try{
+    await migrateAll();
+    await fetchRemote();
+    renderSyncedPhotos();
+    showAdminState('✓ Portal photos connected to Firebase and ready for all devices.',true);
+  }catch(e){
+    console.warn('SFH Firestore portal sync:',e);
+    showAdminState(`Firebase portal sync failed: ${e.message||e}`,false);
+  }
+}
 function start(){const isAdminPage=/\/admin\.html$/i.test(location.pathname);if(isAdminPage){onAuthStateChanged(auth,u=>{if(u?.email?.toLowerCase()===ADMIN_EMAIL)setTimeout(adminMode,600)})}else setTimeout(storeMode,1200)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
