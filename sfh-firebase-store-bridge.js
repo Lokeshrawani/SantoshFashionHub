@@ -1,63 +1,42 @@
 import './firebase-config.js';
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+import {initializeApp,getApps} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getFirestore,collection,getDocs} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
-const app=initializeApp(window.SFH_FIREBASE_CONFIG,{name:'sfh-store-bridge-v4'});
+const app=getApps().find(a=>a.name==='sfh-store-bridge-v4')||initializeApp(window.SFH_FIREBASE_CONFIG,{name:'sfh-store-bridge-v4'});
 const db=getFirestore(app);
 const KEY='sfh-products';
 const FINGERPRINT_KEY='sfh-products-firebase-fingerprint-v4';
 const U='https://images.unsplash.com/';
-const PHOTOS={men:U+'photo-1768696082704-c4e5593d9f27?auto=format&fit=crop&w=1200&q=85',ladies:U+'photo-1692992193981-d3d92fabd9cb?auto=format&fit=crop&w=1200&q=85',kids:U+'photo-1744807561461-00bbe2419a65?auto=format&fit=crop&w=1200&q=85',jeans:U+'photo-1707400131124-a688ed508a95?auto=format&fit=crop&w=1200&q=85',tshirt:U+'photo-1604534609306-00cdac972ad2?auto=format&fit=crop&w=1200&q=85',shirt:U+'photo-1715865717728-298d1925e4c6?auto=format&fit=crop&w=1200&q=85',trouser:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',jacket:U+'photo-1604534609306-00cdac972ad2?auto=format&fit=crop&w=1200&q=85',ethnic:U+'photo-1572470176170-98fa8abcb741?auto=format&fit=crop&w=1200&q=85',active:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',inner:U+'photo-1774414489671-9f33b8dff0a9?auto=format&fit=crop&w=1200&q=85',accessories:U+'photo-1707400131124-a688ed508a95?auto=format&fit=crop&w=1200&q=85'};
-const PRODUCT_PHOTOS={M001:PHOTOS.tshirt,M002:PHOTOS.shirt,J001:PHOTOS.jeans,M003:PHOTOS.trouser,M004:PHOTOS.jacket,K001:PHOTOS.kids,K002:PHOTOS.kids,L001:PHOTOS.ladies,M005:PHOTOS.shirt,J002:PHOTOS.jeans,K003:PHOTOS.kids,L002:PHOTOS.ladies};
+const PHOTOS={men:U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',ladies:U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',kids:U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88',jeans:U+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',tshirt:U+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',shirt:U+'photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1200&q=88',jacket:U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'};
+const PRODUCT_PHOTOS={M001:PHOTOS.tshirt,M002:PHOTOS.shirt,J001:PHOTOS.jeans,M003:PHOTOS.trouser||PHOTOS.men,M004:PHOTOS.jacket,K001:PHOTOS.kids,K002:PHOTOS.kids,L001:PHOTOS.ladies,M005:PHOTOS.shirt,J002:PHOTOS.jeans,K003:PHOTOS.kids,L002:PHOTOS.ladies};
 
-function normalise(p,id){
-  const x={id:String(p?.id||id||''),cat:p?.cat||'T-Shirt',group:p?.group||p?.cat||'Men',name:p?.name||'New Product',price:Number(p?.price)||0,old:Number(p?.old)||0,tag:p?.tag||'NEW',desc:p?.desc||'',sizes:Array.isArray(p?.sizes)&&p.sizes.length?p.sizes:['M','L','XL'],stock:Number.isFinite(Number(p?.stock))?Number(p.stock):10,image:p?.image||'',images:Array.isArray(p?.images)?p.images.filter(Boolean).slice(0,5):[]};
-  if(!x.image&&x.images[0])x.image=x.images[0];
-  if(!x.images.length&&x.image)x.images=[x.image];
-  return x;
+function normalise(p,id){const images=Array.isArray(p.images)?p.images.filter(Boolean).slice(0,5):[];const image=p.image||images[0]||'';return {...p,id:String(p.id||id),group:p.group||p.cat||'Men',name:p.name||'New Product',price:Number(p.price)||0,old:Number(p.old)||0,stock:Number.isFinite(Number(p.stock))?Number(p.stock):0,sizes:Array.isArray(p.sizes)?p.sizes:[],images:image?[image,...images.filter(x=>x!==image)].slice(0,5):images,image};}
+function applyRealPhotos(products){return products.map(p=>{const img=PRODUCT_PHOTOS[p.id];return img&&!p.image?{...p,image:img,images:[img,...(p.images||[]).filter(x=>x!==img)].slice(0,5)}:p})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function renderFirebaseProducts(){
+  const grid=document.getElementById('productGrid');if(!grid)return;
+  let products=[];try{products=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){products=[]}
+  if(!Array.isArray(products)||!products.length)return;
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+  const chips=[...document.querySelectorAll('.chip')];const active=chips.find(x=>x.classList.contains('active'));const cat=active?.dataset.cat||'All';
+  const list=products.filter(p=>(cat==='All'||p.cat===cat||p.group===cat)&&(!q||`${p.name||''} ${p.id||''} ${p.cat||''} ${p.group||''}`.toLowerCase().includes(q)));
+  grid.innerHTML=list.map(p=>{const out=Number(p.stock)<=0;const img=p.image||(p.images||[])[0]||'';return `<article class="product"><div class="productVisual"><span class="tag">${esc(p.tag||'NEW')}</span><button class="wish" onclick="toggleWish('${esc(p.id)}')">♡</button>${img?`<img class="productPhoto" src="${esc(img)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="art">👕</div>`}</div><div class="productInfo"><div class="productMeta"><span>${esc(String(p.group||p.cat||'FASHION').toUpperCase())} • ${esc(p.id)}</span><span>${out?'OUT OF STOCK':'★★★★★'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.desc||'Santosh Fashion Hub product.')}</p><div class="priceRow"><div><strong>₹${Number(p.price||0).toLocaleString('en-IN')}</strong>${Number(p.old)>0?`<span class="old">₹${Number(p.old).toLocaleString('en-IN')}</span>`:''}</div><button class="add" onclick="quickView('${esc(p.id)}')">View +</button></div></div></article>`}).join('');
+  const empty=document.getElementById('emptyState');if(empty)empty.classList.toggle('hidden',list.length>0);
 }
 
-function applyRealPhotos(products){
-  const mapped=products.map(p=>{const img=PRODUCT_PHOTOS[p.id];if(!img||p.image||p.images?.length)return p;return {...p,image:img,images:[img]}});
-  localStorage.setItem(KEY,JSON.stringify(mapped));
-  const slots=[...document.querySelectorAll('.photoSlot')];
-  const items=[['Men’s Wear',PHOTOS.men],['Women’s Wear',PHOTOS.ladies],['Kids’ Wear',PHOTOS.kids],['Jeans',PHOTOS.jeans],['T-Shirts',PHOTOS.tshirt],['Shirts',PHOTOS.shirt],['Trousers',PHOTOS.trouser],['Jackets',PHOTOS.jacket],['Ethnic Wear',PHOTOS.ethnic],['Activewear',PHOTOS.active],['Innerwear',PHOTOS.inner],['Accessories',PHOTOS.accessories]];
-  slots.forEach((slot,i)=>{const [label,src]=items[i%items.length];slot.innerHTML=`<img class="sfh-real-photo" src="${src}" alt="${label} — Santosh Fashion Hub" loading="lazy" referrerpolicy="no-referrer"><span class="photoCaption">${label}</span>`});
-  if(!document.getElementById('sfh-real-photo-css')){const s=document.createElement('style');s.id='sfh-real-photo-css';s.textContent='.photoSlot{position:relative!important;overflow:hidden!important;padding:0!important;min-height:210px!important;border:0!important;background:#111827!important;box-shadow:0 12px 35px rgba(11,16,32,.14)}.sfh-real-photo{width:100%;height:100%;min-height:210px;object-fit:cover;display:block}.photoSlot .photoCaption{position:absolute;left:8px;right:8px;bottom:8px;padding:9px 10px;border-radius:10px;color:#fff;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.78));font-size:12px;font-weight:900;text-align:center}';document.head.appendChild(s)}
-  return mapped;
-}
-
-function makeFingerprint(snap){return snap.docs.map(d=>{const p=d.data()||{};const t=p.updatedAt?.toMillis?.()||0;const images=Array.isArray(p.images)?p.images.join('|'):(p.image||'');return `${d.id}:${t}:${p.price||0}:${p.stock??'missing'}:${p.name||''}:${images}`}).sort().join('||')}
-
+function makeFingerprint(snap){return snap.docs.map(d=>{const p=d.data()||{};const images=Array.isArray(p.images)?p.images.join('|'):(p.image||'');return `${d.id}:${p.updatedAt?.toMillis?.()||0}:${p.price||0}:${p.stock||0}:${p.name||''}:${images}`}).sort().join('||')}
 async function sync(){
   try{
     const snap=await getDocs(collection(db,'products'));
-    const firebaseProducts=snap.docs.map(d=>normalise(d.data(),d.id));
-    let cached=[];try{cached=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){cached=[]}
-
-    // Never replace working storefront data with an empty Firebase collection.
-    // This prevents the public store from becoming "No products found" when
-    // the admin collection is temporarily empty or not yet populated.
-    const products=firebaseProducts.length?applyRealPhotos(firebaseProducts):cached;
-    if(firebaseProducts.length)localStorage.setItem(KEY,JSON.stringify(products));
-
-    const fingerprint=makeFingerprint(snap);
-    const previous=sessionStorage.getItem(FINGERPRINT_KEY);
-    sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);
-
-    window.dispatchEvent(new CustomEvent('sfh-firebase-products-updated',{detail:{products,source:firebaseProducts.length?'firebase':'cache'}}));
-
-    // If Firebase has real products and they changed, reload once so the main
-    // storefront script picks up the new localStorage snapshot.
-    if(firebaseProducts.length&&previous!==null&&previous!==fingerprint){location.reload();return}
-    if(firebaseProducts.length&&previous===null){location.reload();return}
-  }catch(error){
-    console.warn('Santosh Fashion Hub Firebase product sync skipped:',error);
-    let cached=[];try{cached=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){cached=[]}
-    if(Array.isArray(cached)&&cached.length)applyRealPhotos(cached);
-  }
+    let products=snap.docs.map(d=>normalise(d.data()||{},d.id));
+    products=applyRealPhotos(products);
+    localStorage.setItem(KEY,JSON.stringify(products));
+    const fp=makeFingerprint(snap);const old=sessionStorage.getItem(FINGERPRINT_KEY);sessionStorage.setItem(FINGERPRINT_KEY,fp);
+    if(old!==null&&old!==fp){location.reload();return;}
+    renderFirebaseProducts();
+  }catch(error){console.warn('Santosh Fashion Hub Firebase sync:',error);renderFirebaseProducts();}
 }
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{let c=[];try{c=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}applyRealPhotos(Array.isArray(c)?c:[])},80));
-else setTimeout(()=>{let c=[];try{c=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}applyRealPhotos(Array.isArray(c)?c:[])},80);
-sync();
+function start(){setTimeout(()=>{applyRealPhotosFromCache();renderFirebaseProducts();sync()},150)}
+function applyRealPhotosFromCache(){try{const p=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(p)&&p.length)localStorage.setItem(KEY,JSON.stringify(applyRealPhotos(p)))}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
