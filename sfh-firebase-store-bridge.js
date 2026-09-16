@@ -11,24 +11,9 @@ const U='https://images.unsplash.com/';
 const PHOTOS={men:U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',ladies:U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',kids:U+'photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=1200&q=88',jeans:U+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',tshirt:U+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',shirt:U+'photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1200&q=88',jacket:U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'};
 const PRODUCT_PHOTOS={M001:PHOTOS.tshirt,M002:PHOTOS.shirt,J001:PHOTOS.jeans,M003:PHOTOS.men,M004:PHOTOS.jacket,K001:PHOTOS.kids,K002:PHOTOS.kids,L001:PHOTOS.ladies,M005:PHOTOS.shirt,J002:PHOTOS.jeans,K003:PHOTOS.kids,L002:PHOTOS.ladies};
 const COLLECTION_PHOTOS={
-  men:[
-    [U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88','Smart casual'],
-    [U+'photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=1200&q=88','Everyday shirts'],
-    [U+'photo-1488161628813-04466f872be2?auto=format&fit=crop&w=1200&q=88','Modern layers'],
-    [U+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88','Street & active']
-  ],
-  women:[
-    [U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88','Western styles'],
-    [U+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88','Elegant looks'],
-    [U+'photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=88','Everyday fashion'],
-    [U+'photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=88','Comfort & activewear']
-  ],
-  kids:[
-    [U+'photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=1200&q=88','Boys & girls'],
-    [U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88','Playful styles'],
-    [U+'photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1200&q=88','Little fashion'],
-    [U+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88','Cute & comfy']
-  ]
+  men:[[U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88','Smart casual'],[U+'photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=1200&q=88','Everyday shirts'],[U+'photo-1488161628813-04466f872be2?auto=format&fit=crop&w=1200&q=88','Modern layers'],[U+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88','Street & active']],
+  women:[[U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88','Western styles'],[U+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88','Elegant looks'],[U+'photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=88','Everyday fashion'],[U+'photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=88','Comfort & activewear']],
+  kids:[[U+'photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=1200&q=88','Boys & girls'],[U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88','Playful styles'],[U+'photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1200&q=88','Little fashion'],[U+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88','Cute & comfy']]
 };
 const CATEGORY_PHOTOS={Men:PHOTOS.men,Jeans:PHOTOS.jeans,Kids:COLLECTION_PHOTOS.kids[0][0],Ladies:PHOTOS.ladies,Jacket:PHOTOS.jacket,'T-Shirt':PHOTOS.tshirt};
 function normalise(p,id){const images=Array.isArray(p.images)?p.images.filter(Boolean).slice(0,5):[];const image=p.image||images[0]||'';return {...p,id:String(p.id||id),group:p.group||p.cat||'Men',name:p.name||'New Product',price:Number(p.price)||0,old:Number(p.old)||0,stock:Number.isFinite(Number(p.stock))?Number(p.stock):0,sizes:Array.isArray(p.sizes)?p.sizes:[],images:image?[image,...images.filter(x=>x!==image)].slice(0,5):images,image};}
@@ -43,32 +28,18 @@ function enhanceCollectionPhotos(){
     if(!block)return;
     const slots=[...block.querySelectorAll('.photoSlot')];
     const list=CUSTOM_FOR(key,custom)||COLLECTION_PHOTOS[key]||[];
-    list.forEach((item,i)=>{
-      const slot=slots[i];if(!slot)return;
-      const src=Array.isArray(item)?item[0]:item;const caption=Array.isArray(item)?item[1]:`${key} fashion`;
-      slot.dataset.enhanced='true';
-      slot.innerHTML=`<img class="sfh-photo" src="${esc(src)}" alt="${esc(caption)}" loading="lazy"><span class="photoCaption">${esc(caption)}</span><img class="sfh-brand-stamp" src="./assets/logo.svg" alt="Santosh Fashion Hub">`;
-    });
+    list.forEach((item,i)=>{const slot=slots[i];if(!slot)return;const src=Array.isArray(item)?item[0]:item;const caption=Array.isArray(item)?item[1]:`${key} fashion`;slot.dataset.enhanced='true';slot.innerHTML=`<img class="sfh-photo" src="${esc(src)}" alt="${esc(caption)}" loading="lazy"><span class="photoCaption">${esc(caption)}</span><img class="sfh-brand-stamp" src="./assets/logo.svg" alt="Santosh Fashion Hub">`;});
   });
+  if(!document.getElementById('sfh-brand-stamp-style')){const st=document.createElement('style');st.id='sfh-brand-stamp-style';st.textContent='.photoSlot{position:relative}.sfh-brand-stamp{position:absolute;right:10px;top:10px;width:92px;height:auto;max-height:34px;object-fit:contain;padding:5px 7px;border-radius:10px;background:rgba(11,16,32,.78);backdrop-filter:blur(5px);box-shadow:0 6px 18px rgba(0,0,0,.18)}';document.head.appendChild(st)}
 }
 function CUSTOM_FOR(key,custom){if(custom&&custom[key])return [[custom[key],custom[key].includes('data:image')?'Your uploaded photo':'Store photo']];return COLLECTION_PHOTOS[key]||[]}
 function enhanceCategoryRail(){
-  const buttons=[...document.querySelectorAll('.categoryRail button')];
-  const custom=readCustomPhotos();
-  buttons.forEach(btn=>{
-    const label=btn.querySelector('b')?.textContent?.trim();
-    let src=CATEGORY_PHOTOS[label];
-    if(label==='Men'&&custom.men)src=custom.men;if(label==='Ladies'&&custom.women)src=custom.women;if(label==='Kids'&&custom.kids)src=custom.kids;
-    if(!src||btn.querySelector('.sfh-cat-photo'))return;
-    const img=document.createElement('img');img.className='sfh-cat-photo';img.src=src;img.alt=label+' fashion';img.loading='lazy';btn.insertBefore(img,btn.firstChild);
-  });
+  const buttons=[...document.querySelectorAll('.categoryRail button')];const custom=readCustomPhotos();
+  buttons.forEach(btn=>{const label=btn.querySelector('b')?.textContent?.trim();let src=CATEGORY_PHOTOS[label];if(label==='Men'&&custom.men)src=custom.men;if(label==='Ladies'&&custom.women)src=custom.women;if(label==='Kids'&&custom.kids)src=custom.kids;if(!src||btn.querySelector('.sfh-cat-photo'))return;const img=document.createElement('img');img.className='sfh-cat-photo';img.src=src;img.alt=label+' fashion';img.loading='lazy';btn.insertBefore(img,btn.firstChild)});
 }
 function renderFirebaseProducts(){
-  const grid=document.getElementById('productGrid');if(!grid)return;
-  let products=[];try{products=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){products=[]}
-  if(!Array.isArray(products)||!products.length)return;
-  const q=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
-  const chips=[...document.querySelectorAll('.chip')];const active=chips.find(x=>x.classList.contains('active'));const cat=active?.dataset.cat||'All';
+  const grid=document.getElementById('productGrid');if(!grid)return;let products=[];try{products=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){products=[]}if(!Array.isArray(products)||!products.length)return;
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();const chips=[...document.querySelectorAll('.chip')];const active=chips.find(x=>x.classList.contains('active'));const cat=active?.dataset.cat||'All';
   const list=products.filter(p=>(cat==='All'||p.cat===cat||p.group===cat)&&(!q||`${p.name||''} ${p.id||''} ${p.cat||''} ${p.group||''}`.toLowerCase().includes(q)));
   grid.innerHTML=list.map(p=>{const out=Number(p.stock)<=0;const img=p.image||(p.images||[])[0]||'';return `<article class="product"><div class="productVisual"><span class="tag">${esc(p.tag||'NEW')}</span><button class="wish" onclick="toggleWish('${esc(p.id)}')">♡</button>${img?`<img class="productPhoto" src="${esc(img)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="art">👕</div>`}</div><div class="productInfo"><div class="productMeta"><span>${esc(String(p.group||p.cat||'FASHION').toUpperCase())} • ${esc(p.id)}</span><span>${out?'OUT OF STOCK':'★★★★★'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.desc||'Santosh Fashion Hub product.')}</p><div class="priceRow"><div><strong>₹${Number(p.price||0).toLocaleString('en-IN')}</strong>${Number(p.old)>0?`<span class="old">₹${Number(p.old).toLocaleString('en-IN')}</span>`:''}</div><button class="add" onclick="quickView('${esc(p.id)}')">View +</button></div></div></article>`}).join('');
   const empty=document.getElementById('emptyState');if(empty)empty.classList.toggle('hidden',list.length>0);
