@@ -10,12 +10,13 @@ window.SFH_FIREBASE_CONFIG = {
   measurementId: "G-PC8SF81YQV"
 };
 
-// Cross-device fashion-portal sync + universal full-photo fit/quality layer.
+// Cross-device fashion-portal sync + universal full-photo fit/quality + final storefront UI fix.
 (()=>{
   const load=()=>{
     import('./sfh-portal-firebase-sync.js?v=3').catch(e=>console.warn('SFH portal sync load:',e));
     import('./sfh-photo-fit-quality-v1.js?v=2').catch(e=>console.warn('SFH photo quality load:',e));
-    import('./sfh-final-store-visual-fix.js?v=1').catch(e=>console.warn('SFH final visual fix load:',e));
+    import('./sfh-final-store-visual-fix.js?v=1').catch(e=>console.warn('SFH visual fix load:',e));
+    import('./sfh-store-final-fix.js?v=1').catch(e=>console.warn('SFH store final fix load:',e));
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,0),{once:true});
   else setTimeout(load,0);
