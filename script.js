@@ -4,18 +4,18 @@ window.__SFH_MAIN_SCRIPT_LOADED__=true;
 
 const PHONE='919835567894';
 const DEFAULT_PRODUCTS=[
-{id:'M001',cat:'T-Shirt',group:'Men',name:"Men's Premium T-Shirt",price:499,old:699,art:'👕',tag:'BESTSELLER',desc:'Soft everyday style with multiple sizes & varieties.',sizes:['M','L','XL','XXL'],stock:10,image:''},
-{id:'M002',cat:'Men',group:'Men',name:"Men's Casual Shirt",price:699,old:899,art:'👔',tag:'POPULAR',desc:'Smart casual shirt for daily and weekend wear.',sizes:['M','L','XL','XXL'],stock:10,image:''},
-{id:'J001',cat:'Jeans',group:'Men',name:"Men's Denim Jeans",price:999,old:1299,art:'👖',tag:'TRENDING',desc:'Everyday denim with comfortable, stylish fits.',sizes:['30','32','34','36','38'],stock:10,image:''},
-{id:'M003',cat:'Men',group:'Men',name:"Men's Formal Trouser",price:799,old:999,art:'👖',tag:'SMART',desc:'Clean formal look for office and occasions.',sizes:['30','32','34','36','38'],stock:10,image:''},
-{id:'M004',cat:'Jacket',group:'Men',name:"Men's Stylish Jacket",price:1299,old:1699,art:'🧥',tag:'NEW',desc:'Season-ready outer layer with a modern look.',sizes:['M','L','XL','XXL'],stock:10,image:''},
-{id:'K001',cat:'Kids',group:'Kids',name:'Kids Trendy Wear',price:599,old:799,art:'🧒',tag:'KIDS PICK',desc:'Comfortable and fun styles for growing kids.',sizes:['24','26','28','30'],stock:10,image:''},
-{id:'K002',cat:'T-Shirt',group:'Kids',name:"Kids T-Shirt",price:399,old:549,art:'👕',tag:'VALUE',desc:'Easy everyday T-shirt in multiple sizes.',sizes:['24','26','28','30'],stock:10,image:''},
-{id:'L001',cat:'Ladies',group:'Ladies',name:'Ladies Innerwear Collection',price:299,old:399,art:'🩷',tag:'COMFORT',desc:'Comfort-focused collection with size options.',sizes:['S','M','L','XL','XXL'],stock:10,image:''},
-{id:'M005',cat:'Men',group:'Men',name:"Men's Everyday Shirt",price:649,old:849,art:'👔',tag:'VALUE',desc:'Versatile shirt for work and everyday wear.',sizes:['M','L','XL','XXL'],stock:10,image:''},
-{id:'J002',cat:'Jeans',group:'Men',name:"Men's Comfort Denim",price:1099,old:1399,art:'👖',tag:'NEW',desc:'Comfort fit denim for long days.',sizes:['30','32','34','36','38'],stock:10,image:''},
-{id:'K003',cat:'Kids',group:'Kids',name:'Kids Casual Set',price:749,old:999,art:'🧒',tag:'POPULAR',desc:'Easy casual set for play and outings.',sizes:['24','26','28','30'],stock:10,image:''},
-{id:'L002',cat:'Ladies',group:'Ladies',name:'Ladies Comfort Pack',price:349,old:449,art:'🩷',tag:'VALUE',desc:'Comfort-focused everyday innerwear selection.',sizes:['S','M','L','XL','XXL'],stock:10,image:''}
+{id:'M001',cat:'T-Shirt',group:'Men',name:"Men's Premium T-Shirt",price:499,old:699,art:'👕',tag:'BESTSELLER',desc:'Soft everyday style with multiple sizes & varieties.',sizes:['M','L','XL','XXL'],stock:10,image:'assets/products/mens-premium-tshirt.svg'},
+{id:'M002',cat:'Men',group:'Men',name:"Men's Casual Shirt",price:699,old:899,art:'👔',tag:'POPULAR',desc:'Smart casual shirt for daily and weekend wear.',sizes:['M','L','XL','XXL'],stock:10,image:'assets/products/mens-casual-shirt.svg'},
+{id:'J001',cat:'Jeans',group:'Men',name:"Men's Denim Jeans",price:999,old:1299,art:'👖',tag:'TRENDING',desc:'Everyday denim with comfortable, stylish fits.',sizes:['30','32','34','36','38'],stock:10,image:'assets/products/mens-denim-jeans.svg'},
+{id:'M003',cat:'Men',group:'Men',name:"Men's Formal Trouser",price:799,old:999,art:'👖',tag:'SMART',desc:'Clean formal look for office and occasions.',sizes:['30','32','34','36','38'],stock:10,image:'assets/products/mens-formal-trouser.svg'},
+{id:'M004',cat:'Jacket',group:'Men',name:"Men's Stylish Jacket",price:1299,old:1699,art:'🧥',tag:'NEW',desc:'Season-ready outer layer with a modern look.',sizes:['M','L','XL','XXL'],stock:10,image:'assets/products/mens-stylish-jacket.svg'},
+{id:'K001',cat:'Kids',group:'Kids',name:'Kids Trendy Wear',price:599,old:799,art:'🧒',tag:'KIDS PICK',desc:'Comfortable and fun styles for growing kids.',sizes:['24','26','28','30'],stock:10,image:'assets/products/kids-trendy-wear.svg'},
+{id:'K002',cat:'T-Shirt',group:'Kids',name:"Kids T-Shirt",price:399,old:549,art:'👕',tag:'VALUE',desc:'Easy everyday T-shirt in multiple sizes.',sizes:['24','26','28','30'],stock:10,image:'assets/products/kids-tshirt.svg'},
+{id:'L001',cat:'Ladies',group:'Ladies',name:'Ladies Innerwear Collection',price:299,old:399,art:'🩷',tag:'COMFORT',desc:'Comfort-focused collection with size options.',sizes:['S','M','L','XL','XXL'],stock:10,image:'assets/products/ladies-comfort-collection.svg'},
+{id:'M005',cat:'Men',group:'Men',name:"Men's Everyday Shirt",price:649,old:849,art:'👔',tag:'VALUE',desc:'Versatile shirt for work and everyday wear.',sizes:['M','L','XL','XXL'],stock:10,image:'assets/products/mens-everyday-shirt.svg'},
+{id:'J002',cat:'Jeans',group:'Men',name:"Men's Comfort Denim",price:1099,old:1399,art:'👖',tag:'NEW',desc:'Comfort fit denim for long days.',sizes:['30','32','34','36','38'],stock:10,image:'assets/products/mens-comfort-denim.svg'},
+{id:'K003',cat:'Kids',group:'Kids',name:'Kids Casual Set',price:749,old:999,art:'🧒',tag:'POPULAR',desc:'Easy casual set for play and outings.',sizes:['24','26','28','30'],stock:10,image:'assets/products/kids-casual-set.svg'},
+{id:'L002',cat:'Ladies',group:'Ladies',name:'Ladies Comfort Pack',price:349,old:449,art:'🩷',tag:'VALUE',desc:'Comfort-focused everyday innerwear selection.',sizes:['S','M','L','XL','XXL'],stock:10,image:'assets/products/ladies-comfort-pack.svg'}
 ];
 let products=JSON.parse(localStorage.getItem('sfh-products')||'null');
 if(!Array.isArray(products)||!products.length){products=DEFAULT_PRODUCTS;localStorage.setItem('sfh-products',JSON.stringify(products))}
