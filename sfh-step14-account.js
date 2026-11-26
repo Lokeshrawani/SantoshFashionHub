@@ -69,8 +69,10 @@
 
   addAccountButton(); ensurePanel();
   try{
-    const module=await import('./firebase-config.js');
-    const cfg=module?.default||window.SFH_FIREBASE_CONFIG;
+    // The storefront loads its public Firebase config in firebase-config.js.
+    // Yield one task so that script can execute without importing it twice.
+    await new Promise(resolve=>setTimeout(resolve,0));
+    const cfg=window.SFH_FIREBASE_CONFIG;
     if(!cfgReady(cfg)){renderLoggedOut();return;}
     const [{initializeApp},{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,serverTimestamp}]=await Promise.all([
       import(CDN+'firebase-app.js'),
