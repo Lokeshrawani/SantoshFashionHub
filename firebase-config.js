@@ -15,15 +15,13 @@ window.SFH_FIREBASE_CONFIG = {
 // cross-device photo sync and visual compatibility without blocking first render.
 (()=>{
   const load=()=>{
-    const imports=[
-      './sfh-portal-firebase-sync.js?v=3',
-      './sfh-photo-fit-quality-v1.js?v=2',
-      './sfh-final-store-visual-fix.js?v=1',
-      './sfh-store-final-fix.js?v=2'
-    ];
+    const adminPage=/admin[^/]*\.html$/i.test(window.location.pathname);
+    const imports=['./sfh-portal-firebase-sync.js?v=4'];
+    if(adminPage)imports.push('./sfh-photo-fit-quality-v1.js?v=2');
+    else imports.push('./sfh-store-final-fix.js?v=3');
     imports.forEach(src=>import(src).catch(e=>console.warn('SFH deferred layer:',src,e)));
   };
-  const run=()=>setTimeout(load,1400);
+  const run=()=>{if('requestIdleCallback' in window)requestIdleCallback(load,{timeout:5000});else setTimeout(load,3500)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});
   else run();
 })();

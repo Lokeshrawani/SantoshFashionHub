@@ -69,12 +69,20 @@
   function fixBrokenImage(img){
     if(img.dataset.sfhBrokenHandled)return;
     img.dataset.sfhBrokenHandled='1';
-    img.addEventListener('error',()=>{
-      const holder=img.parentElement; if(!holder)return;
+    const onImageError=()=>{
+      const holder=img.parentElement;if(!holder)return;
+      const localFallback=img.dataset.fallbackSrc;
+      if(localFallback&&!img.dataset.sfhFallbackAttempted){
+        img.dataset.sfhFallbackAttempted='1';
+        img.src=localFallback;
+        return;
+      }
       img.style.display='none';
       const existing=holder.querySelector('.sfh-img-fallback');
-      if(!existing){const f=document.createElement('div');f.className='sfh-img-fallback';f.textContent='👕';f.style.cssText='width:100%;height:100%;display:grid;place-items:center;font-size:54px;background:#f4f5f8;color:#667085;';holder.appendChild(f)}
-    },{once:true});
+      if(!existing){const f=document.createElement('div');f.className='sfh-img-fallback';f.textContent='👕';f.style.cssText='width:100%;height:100%;display:grid;place-items:center;font-size:54px;background:#f4f0e9;color:#8b603e;';holder.appendChild(f)}
+    };
+    img.addEventListener('error',onImageError);
+    if(img.complete&&img.naturalWidth===0)onImageError();
   }
 
   function fixProductGrid(){
@@ -83,8 +91,9 @@
       const view=card.querySelector('.priceRow .add');
       const id=view?extractId(view):(card.querySelector('.productMeta span')?.textContent.match(/•\s*([A-Za-z0-9_-]+)/)||[])[1];
       if(id) addButton(card,id);
-      card.querySelectorAll('img.productPhoto,.sfh-photo,.sfh-pp').forEach(fixBrokenImage);
+      card.querySelectorAll('img.productPhoto').forEach(fixBrokenImage);
     });
+    document.querySelectorAll('.sfh-photo,.sfh-cat-photo,.sfh-pp').forEach(fixBrokenImage);
   }
 
   function fixCollectionText(){
@@ -96,10 +105,15 @@
     });
   }
 
-  const obs=new MutationObserver(()=>{fixProductGrid();fixCollectionText()});
-  obs.observe(document.body,{subtree:true,childList:true});
-  const boot=()=>{fixProductGrid();fixCollectionText()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350),{once:true});
-  else setTimeout(boot,350);
-  setInterval(boot,1200);
+  let scheduled=false;
+  const boot=()=>{scheduled=false;fixProductGrid();fixCollectionText()};
+  const obs=new MutationObserver(()=>{
+    if(scheduled)return;
+    scheduled=true;
+    if('requestAnimationFrame' in window)requestAnimationFrame(boot);else setTimeout(boot,80);
+  });
+  const productGrid=document.getElementById('productGrid');
+  obs.observe(productGrid||document.body,{subtree:true,childList:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80),{once:true});
+  else setTimeout(boot,80);
 })();

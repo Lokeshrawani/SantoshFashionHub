@@ -3,6 +3,7 @@
   const CDN='https://www.gstatic.com/firebasejs/12.19.0/';
   let auth=null, db=null;
   let ready=false;
+  let firebasePromise=null;
 
   function cfgReady(c){return c && Object.values(c).every(v=>typeof v==='string'&&v.trim()&&!/^YOUR_/i.test(v));}
   function esc(s){return String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]))}
@@ -47,14 +48,15 @@
   };
 
   const signIn=async(e)=>{
-    e.preventDefault(); if(!ready)return showMsg('Firebase is not connected yet.','bad');
+    e.preventDefault();
+    if(!ready&&!await initialiseFirebase())return showMsg('Firebase is not connected yet.','bad');
     showMsg('Signing in…');
     try{await auth.signInWithEmailAndPassword(document.getElementById('sfhAcctEmail').value.trim(),document.getElementById('sfhAcctPassword').value);showMsg('Signed in successfully.','ok')}
     catch(err){showMsg((err.code||'auth/error').replace('auth/','')||'Sign-in failed.','bad')}
   };
 
   const signUp=async()=>{
-    if(!ready)return showMsg('Firebase is not connected yet.','bad');
+    if(!ready&&!await initialiseFirebase())return showMsg('Firebase is not connected yet.','bad');
     const email=document.getElementById('sfhAcctEmail').value.trim(), password=document.getElementById('sfhAcctPassword').value;
     if(!email||password.length<6)return showMsg('Enter an email and at least 6 characters password.','bad');
     showMsg('Creating account…');
@@ -65,26 +67,42 @@
     }catch(err){showMsg((err.code||'auth/error').replace('auth/','')||'Account creation failed.','bad')}
   };
 
-  window.sfhToggleAccount=(open)=>{ensurePanel();document.getElementById('sfhAccountPanel').classList.toggle('open',open);document.getElementById('sfhAccountBackdrop').classList.toggle('open',open);document.body.style.overflow=open?'hidden':''};
+  async function initialiseFirebase(){
+    if(ready)return true;
+    if(firebasePromise)return firebasePromise;
+    firebasePromise=(async()=>{
+      try{
+        // Let the public config script run before initializing Firebase.
+        await new Promise(resolve=>setTimeout(resolve,0));
+        const cfg=window.SFH_FIREBASE_CONFIG;
+        if(!cfgReady(cfg))return false;
+        const [{initializeApp,getApps},{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut},{getFirestore,doc,setDoc}]=await Promise.all([
+          import(CDN+'firebase-app.js'),
+          import(CDN+'firebase-auth.js'),
+          import(CDN+'firebase-firestore.js')
+        ]);
+        const app=getApps().find(item=>item.name==='[DEFAULT]')||initializeApp(cfg);
+        auth=getAuth(app);db=getFirestore(app);ready=true;
+        auth.signInWithEmailAndPassword=signInWithEmailAndPassword.bind(null,auth);
+        auth.createUserWithEmailAndPassword=createUserWithEmailAndPassword.bind(null,auth);
+        auth.signOut=signOut.bind(null,auth);
+        db.collection=(path)=>({doc:(id)=>({set:(data,opts)=>setDoc(doc(db,path,id),data,opts)})});
+        onAuthStateChanged(auth,user=>{updateLabel(user);if(document.getElementById('sfhAccountPanel')?.classList.contains('open'))user?renderLoggedIn(user):renderLoggedOut()});
+        return true;
+      }catch(error){console.warn('Santosh Fashion Hub account auth:',error);return false;}
+    })();
+    return firebasePromise;
+  }
 
-  addAccountButton(); ensurePanel();
-  try{
-    const module=await import('./firebase-config.js');
-    const cfg=module?.default||window.SFH_FIREBASE_CONFIG;
-    if(!cfgReady(cfg)){renderLoggedOut();return;}
-    const [{initializeApp},{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut},{getFirestore,doc,setDoc,serverTimestamp}]=await Promise.all([
-      import(CDN+'firebase-app.js'),
-      import(CDN+'firebase-auth.js'),
-      import(CDN+'firebase-firestore.js')
-    ]);
-    const app=initializeApp(cfg); auth=getAuth(app); db=getFirestore(app); ready=true;
-    auth.signInWithEmailAndPassword=signInWithEmailAndPassword.bind(null,auth);
-    auth.createUserWithEmailAndPassword=createUserWithEmailAndPassword.bind(null,auth);
-    auth.signOut=signOut.bind(null,auth);
-    db.collection=(path)=>({doc:(id)=>({set:(data,opts)=>setDoc(doc(db,path,id),data,opts)})});
-    onAuthStateChanged(auth,user=>{updateLabel(user);if(document.getElementById('sfhAccountPanel')?.classList.contains('open')) user?renderLoggedIn(user):renderLoggedOut()});
-    renderLoggedOut();
-  }catch(e){renderLoggedOut();}
+  window.sfhToggleAccount=(open)=>{
+    ensurePanel();
+    document.getElementById('sfhAccountPanel').classList.toggle('open',open);
+    document.getElementById('sfhAccountBackdrop').classList.toggle('open',open);
+    document.body.style.overflow=open?'hidden':'';
+    if(open)initialiseFirebase();
+  };
+
+  addAccountButton();ensurePanel();renderLoggedOut();
 
   document.addEventListener('click',e=>{
     const btn=e.target.closest?.('[data-account-open]');

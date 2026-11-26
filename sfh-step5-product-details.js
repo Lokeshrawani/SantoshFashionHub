@@ -14,7 +14,8 @@
     const sizes=Array.isArray(p.sizes)&&p.sizes.length?p.sizes:['Free Size'];
     const d=discountPct(p);
     const first=sizes[0];
-    const image=p.image ? `<img class="productPhoto" src="${p.image}" alt="${p.name}">` : `<div class="art">${p.art||'👕'}</div>`;
+    const fallback=`assets/products/${String(p.id||'').startsWith('K')?'kids-trendy-wear.svg':String(p.id||'').startsWith('L')?'ladies-comfort-collection.svg':String(p.id||'').startsWith('J')?'mens-denim-jeans.svg':'mens-premium-tshirt.svg'}`;
+    const image=p.image ? `<img class="productPhoto" src="${p.image}" data-fallback-src="${fallback}" alt="${p.name}" loading="eager" decoding="async">` : `<img class="productPhoto" src="${fallback}" alt="${p.name}" loading="eager" decoding="async">`;
     const wa=`https://wa.me/${window.PHONE||'919835567894'}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please confirm size, stock, final price and delivery details.')}`;
 
     const c=document.getElementById('quickViewContent');
