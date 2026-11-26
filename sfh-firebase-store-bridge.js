@@ -1,4 +1,4 @@
-if(!window.SFH_FIREBASE_CONFIG)await import('./firebase-config.js');
+if(!window.SFH_FIREBASE_CONFIG)throw new Error('Firebase configuration is not available on this page.');
 import {initializeApp,getApps} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getFirestore,collection,getDocs} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
