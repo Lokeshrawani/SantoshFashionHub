@@ -15,7 +15,7 @@
     const d=discountPct(p);
     const first=sizes[0];
     const fallback=`assets/products/${String(p.id||'').startsWith('K')?'kids-trendy-wear.svg':String(p.id||'').startsWith('L')?'ladies-comfort-collection.svg':String(p.id||'').startsWith('J')?'mens-denim-jeans.svg':'mens-premium-tshirt.svg'}`;
-    const image=p.image ? `<img class="productPhoto" src="${p.image}" data-fallback-src="${fallback}" alt="${p.name}" loading="eager" decoding="async">` : `<img class="productPhoto" src="${fallback}" alt="${p.name}" loading="eager" decoding="async">`;
+    const image=p.image ? `<img class="productPhoto" src="${p.image}" data-fallback-src="${fallback}" alt="${p.name}" loading="eager" decoding="async">` : `<img class="productPhoto" src="${fallback}" data-fallback-src="${fallback}" alt="${p.name}" loading="eager" decoding="async">`;
     const wa=`https://wa.me/${window.PHONE||'919835567894'}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please confirm size, stock, final price and delivery details.')}`;
 
     const c=document.getElementById('quickViewContent');
@@ -41,6 +41,14 @@
         </div>
       </div>`;
 
+    const detailImage=c.querySelector('img.productPhoto');
+    if(detailImage)detailImage.addEventListener('error',()=>{
+      const fallbackSrc=detailImage.dataset.fallbackSrc;
+      if(fallbackSrc&&!detailImage.dataset.sfhFallbackAttempted){
+        detailImage.dataset.sfhFallbackAttempted='1';
+        detailImage.src=fallbackSrc;
+      }else detailImage.style.display='none';
+    },{once:true});
     window.__sfhDetail={id:p.id,size:first,qty:1};
     document.getElementById('quickView').classList.add('open');
   };
