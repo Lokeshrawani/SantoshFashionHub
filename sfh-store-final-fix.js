@@ -71,6 +71,12 @@
     img.dataset.sfhBrokenHandled='1';
     img.addEventListener('error',()=>{
       const holder=img.parentElement; if(!holder)return;
+      const localFallback=img.dataset.fallbackSrc;
+      if(localFallback&&img.src!==new URL(localFallback,document.baseURI).href){
+        img.dataset.fallbackSrc='';
+        img.src=localFallback;
+        return;
+      }
       img.style.display='none';
       const existing=holder.querySelector('.sfh-img-fallback');
       if(!existing){const f=document.createElement('div');f.className='sfh-img-fallback';f.textContent='👕';f.style.cssText='width:100%;height:100%;display:grid;place-items:center;font-size:54px;background:#f4f5f8;color:#667085;';holder.appendChild(f)}
@@ -96,10 +102,14 @@
     });
   }
 
-  const obs=new MutationObserver(()=>{fixProductGrid();fixCollectionText()});
+  let scheduled=false;
+  const boot=()=>{scheduled=false;fixProductGrid();fixCollectionText()};
+  const obs=new MutationObserver(()=>{
+    if(scheduled)return;
+    scheduled=true;
+    if('requestAnimationFrame' in window)requestAnimationFrame(boot);else setTimeout(boot,80);
+  });
   obs.observe(document.body,{subtree:true,childList:true});
-  const boot=()=>{fixProductGrid();fixCollectionText()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350),{once:true});
-  else setTimeout(boot,350);
-  setInterval(boot,1200);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80),{once:true});
+  else setTimeout(boot,80);
 })();
