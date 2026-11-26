@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Santosh Fashion Hub | Fashion for Everyone</title>
 <meta name="description" content="Santosh Fashion Hub — men's fashion, women's wear, kids wear, jeans, T-shirts, shirts, trousers, jackets, ethnic wear, activewear, innerwear and accessories.">
-<meta name="theme-color" content="#211d1a"><link rel="icon" href="assets/logo.svg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sfh-premium-theme.css?v=1">
+<meta name="theme-color" content="#211d1a"><link rel="icon" href="assets/logo.svg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sfh-premium-theme.css?v=2">
 <style>
 /* SFH dynamic category-photo fallback / cache-safe storefront styles */
 .sfh-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}.photoSlot{position:relative;overflow:hidden;padding:0!important;min-height:190px;background:#111827!important;border:0!important}.photoCaption{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 13px;color:#fff;text-align:left;font-size:13px;font-weight:900;background:linear-gradient(transparent,rgba(5,8,18,.86));letter-spacing:.2px}.sfh-brand-stamp{position:absolute;top:12px;right:12px;width:82px;height:auto;max-height:30px;padding:6px 8px;border-radius:9px;background:rgba(11,16,32,.72);backdrop-filter:blur(8px);object-fit:contain}.categoryRail button{padding:0!important;overflow:hidden;min-height:205px;position:relative;text-align:left}.categoryRail button .sfh-cat-photo{width:100%;height:135px;object-fit:cover;display:block}.categoryRail button i{display:none}.categoryRail button b,.categoryRail button small{padding-left:15px}.categoryRail button b{margin-top:12px}.categoryRail button small{margin-bottom:14px}.categoryRail button:has(.sfh-cat-photo){box-shadow:0 12px 28px rgba(11,16,32,.08)}
@@ -12,7 +12,7 @@
 @media(max-width:800px){.photoSlots,.collectionGroups{grid-template-columns:1fr 1fr}}@media(max-width:520px){.photoSlots,.collectionGroups{grid-template-columns:1fr}.photoSlot{min-height:120px}.sfh-brand-stamp{width:70px}}
 </style>
 <link rel="stylesheet" href="./sfh-step5-product-details.css"><link rel="stylesheet" href="./sfh-step6-checkout.css"><link rel="stylesheet" href="./sfh-step14-account.css"><link rel="stylesheet" href="./sfh-step15-profile-tracking.css">
-<script type="module" src="./sfh-firebase-store-bridge.js?v=7"></script>
+
 
 <style id="sfh-photo-enhancement">
 .sfh-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;transition:transform .45s ease,filter .45s ease}.photoSlot{position:relative;overflow:hidden;padding:0!important;min-height:190px;background:#111827!important;border:0!important;box-shadow:0 12px 35px rgba(11,16,32,.12)}.photoSlot:hover .sfh-photo{transform:scale(1.06);filter:saturate(1.08)}.photoCaption{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 13px;color:#fff;text-align:left;font-size:13px;font-weight:900;background:linear-gradient(transparent,rgba(5,8,18,.86));letter-spacing:.2px}.categoryRail button{padding:0!important;overflow:hidden;min-height:205px;position:relative;text-align:left}.categoryRail button .sfh-cat-photo{width:100%;height:135px;object-fit:cover;display:block}.categoryRail button i{display:none}.categoryRail button b,.categoryRail button small{padding-left:15px}.categoryRail button b{margin-top:12px}.categoryRail button small{margin-bottom:14px}.photoShowcase{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.photoShowcase .sfh-tile{position:relative;height:210px;border-radius:18px;overflow:hidden;background:#111827;box-shadow:0 14px 35px rgba(11,16,32,.12)}.sfh-tile img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.sfh-tile:hover img{transform:scale(1.05)}.sfh-tile span{position:absolute;left:0;right:0;bottom:0;padding:35px 13px 12px;color:#fff;font-size:12px;font-weight:900;background:linear-gradient(transparent,rgba(5,8,18,.88))}@media(max-width:800px){.photoShowcase{grid-template-columns:1fr 1fr}.categoryRail{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){.photoShowcase{grid-template-columns:1fr}.categoryRail{grid-template-columns:repeat(2,1fr)}.categoryRail button{min-height:185px}.categoryRail button .sfh-cat-photo{height:115px}}
@@ -40,24 +40,69 @@
 <section id="contact" class="contact"><div><span class="eyebrow">CONTACT</span><h2>Ready to shop?</h2><p>Tell us what you need. Product name/ID, size, quantity and delivery PIN code are enough to start.</p><div class="contactLinks"><a href="https://wa.me/919835567894" target="_blank">💬 <span><b>WhatsApp</b><small>+91 98355 67894</small></span></a><a href="mailto:santoshrawani123@gmail.com">✉️ <span><b>Email</b><small>santoshrawani123@gmail.com</small></span></a></div></div><form id="enquiryForm" onsubmit="sendEnquiry(event)"><input id="enqName" required placeholder="Your name"><input id="enqPhone" required inputmode="tel" placeholder="Mobile number"><input id="enqPin" inputmode="numeric" placeholder="Delivery PIN code"><textarea id="enqMessage" required rows="4" placeholder="What are you looking for? (e.g. 2 XL T-shirts)"></textarea><button class="btn primary" type="submit">Send enquiry on WhatsApp →</button></form></section>
 </main>
 <footer><div class="footerBrand"><img src="assets/logo.svg" alt="Santosh Fashion Hub logo"><p>Fashion for everyone — local store convenience with online shopping support.</p><p class="footerAddress">Bihar State Highway 82 (SH 82), Roh, Nawada District, Bihar – 805141, India</p></div><div><b>Shop</b><a href="#products">Best Sellers</a><a href="#categories">Categories</a><a href="#offers">Offers</a></div><div><b>Help</b><a href="./sfh-step8-orders.html">My Orders</a><a href="./sfh-step15-account.html">My Account</a><a href="#contact">Contact</a></div><div><b>Visit</b><a href="#location">Location</a><a href="https://wa.me/919835567894" target="_blank">WhatsApp</a><a href="mailto:santoshrawani123@gmail.com">Email</a></div><div class="copyright">© 2026 Santosh Fashion Hub. All rights reserved.</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div id="overlay" class="overlay" onclick="closeCart();closeWishlist();closeQuick();"></div>
-<aside id="cartDrawer" class="drawer"><div class="drawerHead"><h2>Your Cart <span id="drawerCount">0</span></h2><button onclick="closeCart()">×</button></div><div id="cartBody" class="drawerBody"></div><div class="drawerFoot"><div class="coupon"><input id="coupon" placeholder="Coupon code"><button onclick="applyCoupon()">Apply</button></div><div class="summary"><span>Subtotal</span><strong id="subtotal">₹0</strong></div><small>Shipping, COD/UPI and final stock confirmation will be handled by the store.</small><button class="btn dark full" onclick="orderWhatsApp()">💬 Order on WhatsApp</button><button class="btn outline full" onclick="checkout()">Checkout</button></div></aside>
-<aside id="wishDrawer" class="drawer"><div class="drawerHead"><h2>Wishlist <span id="wishDrawerCount">0</span></h2><button onclick="closeWishlist()">×</button></div><div id="wishBody" class="drawerBody"></div></aside>
-<div id="quickModal" class="modal"><div class="modalCard"><button class="modalClose" onclick="closeQuick()">×</button><div id="quickBody"></div></div></div>
+<aside id="cartDrawer" class="drawer"><div class="drawerHead"><h2>Your Cart <span id="drawerCount">0</span></h2><button onclick="closeCart()">×</button></div><div id="cartItems" class="drawerBody"></div><div class="drawerFoot"><div class="coupon"><input id="coupon" placeholder="Coupon code"><button onclick="applyCoupon()">Apply</button></div><div class="summary"><span>Subtotal</span><strong id="cartTotal">₹0</strong></div><small>Shipping, COD/UPI and final stock confirmation will be handled by the store.</small><button class="btn dark full" onclick="orderWhatsApp()">💬 Order on WhatsApp</button><button class="btn outline full" onclick="checkout()">Checkout</button></div></aside>
+<aside id="wishlistDrawer" class="drawer"><div class="drawerHead"><h2>Wishlist <span id="wishDrawerCount">0</span></h2><button onclick="closeWishlist()">×</button></div><div id="wishItems" class="drawerBody"></div></aside>
+<div id="quickView" class="modal"><div class="modalCard"><button class="modalClose" type="button" aria-label="Close product details" onclick="closeQuickView()">×</button><div id="quickViewContent"></div></div></div>
 <script src="script.js"></script>
 <script src="./sfh-step8-orders.js"></script><script src="./sfh-step14-account.js"></script><script src="./sfh-step15-profile-tracking.js"></script>
 <script src="./sfh-step5-product-details.js"></script>
 <script src="./sfh-step6-checkout.js"></script>
 <script src="./firebase-config.js"></script>
-<script src="./sfh-step17-firestore-sync.js"></script>
+
 <script id="sfh-photo-enhancement-js">
-(()=>{const U='https://images.unsplash.com/';const P={
-men:[U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',U+'photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=88',U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88',U+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88'],
-women:[U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',U+'photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=88',U+'photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=88',U+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88'],
-kids:[U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88',U+'photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&w=1200&q=88',U+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88',U+'photo-1566454544259-f4b94c3d7585?auto=format&fit=crop&w=1200&q=88'],
-jeans:U+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',tshirt:U+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',jacket:U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'};
-const mk=(u,a,c)=>{let x=document.createElement('img');x.src=u;x.alt=a;x.loading='lazy';x.className=c;return x};
-document.querySelectorAll('.categoryRail button').forEach((b,i)=>{let k=['men','jeans','kids','women','jacket','tshirt'][i],u=typeof P[k]=='string'?P[k]:P[k][0];b.prepend(mk(u,b.querySelector('b')?.textContent||'Fashion','sfh-cat-photo'))});
-[['men',P.men],['women',P.women],['kids',P.kids]].forEach((set,idx)=>{let block=document.querySelectorAll('.collectionBlock')[idx];if(!block)return;block.querySelectorAll('.photoSlot').forEach((slot,i)=>{slot.textContent='';slot.append(mk(set[1][i],set[0]+' fashion','sfh-photo'));let c=document.createElement('div');c.className='photoCaption';c.textContent=set[0]=='men'?['Shirts & T-Shirts','Jeans & Bottomwear','Jackets & Layers','Smart & Casual'][i]:set[0]=='women'?['Western Wear','Ethnic & Traditional','Lifestyle & Comfort','Modern Collections'][i]:['Boys Fashion','Girls Fashion','Infants & Toddlers','Kids Nightwear'][i];slot.append(c)})});
-})();</script>
+(()=> {
+  const P={
+    men:['assets/products/mens-casual-shirt.svg','assets/products/mens-denim-jeans.svg','assets/products/mens-formal-trouser.svg','assets/products/mens-stylish-jacket.svg'],
+    women:['assets/products/ladies-comfort-collection.svg','assets/products/ladies-comfort-pack.svg','assets/products/ladies-comfort-collection.svg','assets/products/ladies-comfort-pack.svg'],
+    kids:['assets/products/kids-trendy-wear.svg','assets/products/kids-casual-set.svg','assets/products/kids-tshirt.svg','assets/products/kids-trendy-wear.svg'],
+    jeans:'assets/products/mens-denim-jeans.svg',
+    tshirt:'assets/products/mens-premium-tshirt.svg',
+    jacket:'assets/products/mens-stylish-jacket.svg'
+  };
+  const makeImage=(src,alt,className)=>{
+    const img=document.createElement('img');
+    img.src=src;img.alt=alt;img.loading='lazy';img.decoding='async';img.className=className;
+    img.onerror=()=>{img.onerror=null;img.removeAttribute('src');img.alt=alt+' image unavailable';img.classList.add('sfh-image-unavailable')};
+    return img;
+  };
+  document.querySelectorAll('.categoryRail button').forEach((button,index)=>{
+    const key=['men','jeans','kids','women','jacket','tshirt'][index];
+    const src=Array.isArray(P[key])?P[key][0]:P[key];
+    if(src&&!button.querySelector('.sfh-cat-photo'))button.prepend(makeImage(src,button.querySelector('b')?.textContent||'Fashion','sfh-cat-photo'));
+  });
+  [['men',P.men],['women',P.women],['kids',P.kids]].forEach(([key,photos],index)=>{
+    const block=document.querySelectorAll('.collectionBlock')[index];
+    if(!block)return;
+    block.querySelectorAll('.photoSlot').forEach((slot,photoIndex)=>{
+      const src=photos[photoIndex];if(!src)return;
+      slot.textContent='';
+      slot.append(makeImage(src,key+' fashion','sfh-photo'));
+      const caption=document.createElement('div');caption.className='photoCaption';
+      caption.textContent=key==='men'?['Shirts & T-Shirts','Jeans & Bottomwear','Formal Trousers','Jackets & Layers'][photoIndex]:
+        key==='women'?['Everyday Collection','Comfort Essentials','Ladies Collection','Innerwear & Comfort'][photoIndex]:
+        ['Boys Fashion','Girls Fashion','Kids T-Shirts','Everyday Kidswear'][photoIndex];
+      slot.append(caption);
+    });
+  });
+})();
+</script>
+<script>
+window.addEventListener('load',function(){
+  window.setTimeout(function(){
+    const loader=document.createElement('script');
+    loader.src='./sfh-step17-firestore-sync.js';
+    loader.async=true;
+    document.body.appendChild(loader);
+  },4500);
+},{once:true});
+</script>
+<script type="module">
+window.addEventListener('load',function(){
+  const loadBridge=()=>import('./sfh-firebase-store-bridge.js?v=8').catch(error=>console.warn('Store sync is temporarily unavailable:',error));
+  if('requestIdleCallback' in window)window.requestIdleCallback(loadBridge,{timeout:4500});
+  else window.setTimeout(loadBridge,2500);
+},{once:true});
+</script>
 </body></html>
