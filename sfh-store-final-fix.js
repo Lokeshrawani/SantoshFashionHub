@@ -112,7 +112,8 @@
     scheduled=true;
     if('requestAnimationFrame' in window)requestAnimationFrame(boot);else setTimeout(boot,80);
   });
-  obs.observe(document.body,{subtree:true,childList:true});
+  const productGrid=document.getElementById('productGrid');
+  obs.observe(productGrid||document.body,{subtree:true,childList:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80),{once:true});
   else setTimeout(boot,80);
 })();
