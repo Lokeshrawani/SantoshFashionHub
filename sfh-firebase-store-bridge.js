@@ -7,22 +7,30 @@ const db=getFirestore(app);
 const KEY='sfh-products';
 const COLLECTION_KEY='sfh-collection-photos-v1';
 const FINGERPRINT_KEY='sfh-products-firebase-fingerprint-v7';
-const U='https://images.unsplash.com/';
-const PHOTOS={men:U+'photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=88',ladies:U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88',kids:U+'photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=1200&q=88',jeans:U+'photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=88',tshirt:U+'photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=88',shirt:U+'photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1200&q=88',trouser:U+'photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=88',jacket:U+'photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1200&q=88'};
-const PRODUCT_PHOTOS={M001:PHOTOS.tshirt,M002:PHOTOS.shirt,J001:PHOTOS.jeans,M003:PHOTOS.men,M004:PHOTOS.jacket,K001:PHOTOS.kids,K002:PHOTOS.kids,L001:PHOTOS.ladies,M005:PHOTOS.shirt,J002:PHOTOS.jeans,K003:PHOTOS.kids,L002:PHOTOS.ladies};
+const PHOTOS={
+  men:'assets/products/mens-casual-shirt.svg',
+  ladies:'assets/products/ladies-comfort-collection.svg',
+  kids:'assets/products/kids-trendy-wear.svg',
+  jeans:'assets/products/mens-denim-jeans.svg',
+  tshirt:'assets/products/mens-premium-tshirt.svg',
+  shirt:'assets/products/mens-everyday-shirt.svg',
+  trouser:'assets/products/mens-formal-trouser.svg',
+  jacket:'assets/products/mens-stylish-jacket.svg'
+};
+const PRODUCT_PHOTOS={M001:PHOTOS.tshirt,M002:PHOTOS.shirt,J001:PHOTOS.jeans,M003:PHOTOS.trouser,M004:PHOTOS.jacket,K001:PHOTOS.kids,K002:PHOTOS.kids,L001:PHOTOS.ladies,M005:PHOTOS.shirt,J002:PHOTOS.jeans,K003:'assets/products/kids-casual-set.svg',L002:'assets/products/ladies-comfort-pack.svg'};
 const COLLECTION_PHOTOS={
-  men:[[PHOTOS.men,'Smart casual'],[U+'photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=1200&q=88','Everyday shirts'],[U+'photo-1488161628813-04466f872be2?auto=format&fit=crop&w=1200&q=88','Modern layers'],[U+'photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=88','Street & active']],
-  women:[[PHOTOS.ladies,'Western styles'],[U+'photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=88','Elegant looks'],[U+'photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=88','Everyday fashion'],[U+'photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=88','Comfort & activewear']],
-  kids:[[PHOTOS.kids,'Boys & girls'],[U+'photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1200&q=88','Playful styles'],[U+'photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1200&q=88','Little fashion'],[U+'photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1200&q=88','Cute & comfy']],
-  jeans:[[PHOTOS.jeans,'Classic denim'],[U+'photo-1582552938357-32b906df40cb?auto=format&fit=crop&w=1200&q=88','Relaxed fit'],[U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88','Casual street'],[U+'photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=88','Everyday denim']],
-  tshirt:[[PHOTOS.tshirt,'Everyday tees'],[U+'photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1200&q=88','Premium basics'],[U+'photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=88','Street graphics'],[U+'photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=88','Comfort fits']],
-  shirt:[[PHOTOS.shirt,'Smart shirts'],[U+'photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=1200&q=88','Formal edits'],[U+'photo-1610652492500-ded49ceeb378?auto=format&fit=crop&w=1200&q=88','Casual checks'],[U+'photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1200&q=88','Weekend style']],
-  trouser:[[PHOTOS.trouser,'Classic trousers'],[U+'photo-1506629905607-d9d4b3b4d7d7?auto=format&fit=crop&w=1200&q=88','Chinos'],[U+'photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=88','Smart fits'],[U+'photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=88','Office ready']],
-  jacket:[[PHOTOS.jacket,'Layering season'],[U+'photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=88','Modern jackets'],[U+'photo-1548883354-7622d03aca27?auto=format&fit=crop&w=1200&q=88','Urban outerwear'],[U+'photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=1200&q=88','Winter essentials']],
-  ethnic:[[U+'photo-1603252110481-7ba873bf42ab?auto=format&fit=crop&w=1200&q=88','Festive kurtas'],[U+'photo-1610189012906-2f4e5e9a9f61?auto=format&fit=crop&w=1200&q=88','Traditional looks'],[U+'photo-1566206091558-7f218b696731?auto=format&fit=crop&w=1200&q=88','Wedding edits'],[U+'photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=88','Elegant ethnic']],
-  activewear:[[U+'photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=88','Move easy'],[U+'photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=88','Gym essentials'],[U+'photo-1538805060514-97d9cc17730c?auto=format&fit=crop&w=1200&q=88','Training wear'],[U+'photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=88','Performance styles']],
-  innerwear:[[U+'photo-1583743814966-8936f37f4678?auto=format&fit=crop&w=1200&q=88','Everyday comfort'],[U+'photo-1578681994506-b8f463449011?auto=format&fit=crop&w=1200&q=88','Soft essentials'],[U+'photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=1200&q=88','Loungewear'],[U+'photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=88','Relaxed basics']],
-  accessories:[[U+'photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=88','Bags & wallets'],[U+'photo-1627123424574-724758594e93?auto=format&fit=crop&w=1200&q=88','Belts & small goods'],[U+'photo-1523779917675-b6ed3a42a561?auto=format&fit=crop&w=1200&q=88','Fashion accents'],[U+'photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=1200&q=88','Finishing touches']]
+  men:[[PHOTOS.men,'Smart casual'],[PHOTOS.jeans,'Everyday denim'],[PHOTOS.trouser,'Formal trousers'],[PHOTOS.jacket,'Modern layers']],
+  women:[[PHOTOS.ladies,'Western styles'],['assets/products/ladies-comfort-pack.svg','Comfort essentials'],[PHOTOS.ladies,'Everyday collection'],['assets/products/ladies-comfort-pack.svg','Lifestyle & comfort']],
+  kids:[[PHOTOS.kids,'Boys & girls'],['assets/products/kids-casual-set.svg','Playful styles'],['assets/products/kids-tshirt.svg','Little fashion'],[PHOTOS.kids,'Cute & comfy']],
+  jeans:[[PHOTOS.jeans,'Classic denim'],['assets/products/mens-comfort-denim.svg','Relaxed fit'],[PHOTOS.jeans,'Casual street'],['assets/products/mens-denim-jeans.svg','Everyday denim']],
+  tshirt:[[PHOTOS.tshirt,'Everyday tees'],[PHOTOS.tshirt,'Premium basics'],['assets/products/kids-tshirt.svg','Graphic styles'],[PHOTOS.tshirt,'Comfort fits']],
+  shirt:[[PHOTOS.shirt,'Smart shirts'],[PHOTOS.shirt,'Formal edits'],[PHOTOS.shirt,'Casual checks'],[PHOTOS.shirt,'Weekend style']],
+  trouser:[[PHOTOS.trouser,'Classic trousers'],[PHOTOS.trouser,'Chinos'],[PHOTOS.trouser,'Smart fits'],[PHOTOS.trouser,'Office ready']],
+  jacket:[[PHOTOS.jacket,'Layering season'],[PHOTOS.jacket,'Modern jackets'],[PHOTOS.jacket,'Urban outerwear'],[PHOTOS.jacket,'Winter essentials']],
+  ethnic:[[PHOTOS.men,'Festive styles'],[PHOTOS.men,'Traditional looks'],[PHOTOS.men,'Wedding edits'],[PHOTOS.men,'Elegant ethnic']],
+  activewear:[[PHOTOS.tshirt,'Move easy'],[PHOTOS.tshirt,'Gym essentials'],[PHOTOS.tshirt,'Training wear'],[PHOTOS.tshirt,'Performance styles']],
+  innerwear:[[PHOTOS.ladies,'Everyday comfort'],[PHOTOS.ladies,'Soft essentials'],[PHOTOS.ladies,'Loungewear'],[PHOTOS.ladies,'Relaxed basics']],
+  accessories:[[PHOTOS.jacket,'Bags & wallets'],[PHOTOS.trouser,'Belts & small goods'],[PHOTOS.shirt,'Fashion accents'],[PHOTOS.jacket,'Finishing touches']]
 };
 const PORTALS={
   men:{label:"Men",key:'men',cat:'Men',icon:'👔',kicker:"01 • MEN'S WEAR",title:"Men's Fashion Portal",tag:'SHIRTS • T-SHIRTS • JEANS • JACKETS',items:['T-Shirts','Polos','Casual Shirts','Formal Shirts','Jeans','Trousers & Chinos','Jackets','Ethnic Wear','Activewear','Innerwear','Belts & Wallets']},
@@ -64,10 +72,31 @@ function enhanceCategoryRail(){const buttons=[...document.querySelectorAll('.cat
 function renderPortalCard(portal,custom){const photos=asFour(portal.key,custom);return `<article class="sfh-portal-card" id="sfh-portal-${portal.key}"><div class="sfh-portal-card-head"><div><span class="eyebrow">${esc(portal.kicker)}</span><h3>${esc(portal.icon+' '+portal.title)}</h3></div><span class="sfh-tag">${esc(portal.tag)}</span></div><div class="sfh-portal-photos">${photos.map((p,i)=>`<div class="sfh-portal-photo"><img class="sfh-pp" src="${esc(p[0])}" alt="${esc(portal.label+' '+(i+1))}" loading="lazy"><img class="sfh-pp-logo" src="./assets/logo.svg" alt="Santosh Fashion Hub"><span class="sfh-pp-caption">${esc(p[1])}</span></div>`).join('')}</div><div class="sfh-portal-items">${portal.items.map(item=>`<button type="button" data-portal-cat="${esc(portal.cat)}">${esc(item)}</button>`).join('')}</div><div class="sfh-portal-cta"><span>📸 Photo Studio connected • Uploads from Admin appear here automatically</span><button type="button" data-portal-shop="${esc(portal.cat)}">Shop ${esc(portal.label)} →</button></div></article>`}
 function installPortalHub(){if(document.getElementById('sfh-fashion-portals'))return;const categories=document.getElementById('categories');if(!categories)return;const sec=document.createElement('section');sec.id='sfh-fashion-portals';sec.innerHTML=`<div class="sfh-portal-head"><div><span class="eyebrow">ACTIVE FASHION PORTALS</span><h2>Choose Your Fashion Department</h2><p>Every department is now a live portal. Click a portal, browse its photo showcase, then jump straight to matching products.</p></div></div><div class="sfh-portal-menu">${PORTAL_KEYS.map(k=>{const p=PORTALS[k];return `<button type="button" data-open-portal="${k}"><span class="picon">${p.icon}</span><b>${esc(p.label)}</b><small>Open portal →</small></button>`}).join('')}</div><div class="sfh-portal-list">${PORTAL_KEYS.map(k=>renderPortalCard(PORTALS[k],readCustomPhotos())).join('')}</div>`;categories.parentNode.insertBefore(sec,categories.nextSibling);bindPortalHub(sec)}
 function bindPortalHub(sec){const go=k=>{const target=document.getElementById('sfh-portal-'+k);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});sec.querySelectorAll('[data-open-portal]').forEach(x=>x.classList.toggle('active',x.dataset.openPortal===k))};sec.querySelectorAll('[data-open-portal]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.openPortal)));sec.querySelectorAll('[data-portal-shop],[data-portal-cat]').forEach(b=>b.addEventListener('click',()=>{const cat=b.dataset.portalShop||b.dataset.portalCat;try{if(typeof window.setCategory==='function')window.setCategory(cat)}catch(e){};document.getElementById('products')?.scrollIntoView({behavior:'smooth',block:'start'})}));}
-function wireMainCategoryButtons(){document.querySelectorAll('.categoryRail button').forEach(btn=>{if(btn.dataset.sfhPortalWired)return;btn.dataset.sfhPortalWired='1';btn.addEventListener('click',()=>{const label=btn.querySelector('b')?.textContent?.trim();const map={Men:'men',Jeans:'jeans',Kids:'kids',Ladies:'women',Jackets:'jacket','T-Shirts':'tshirt'};const k=map[label];if(k)document.getElementById('sfh-portal-'+k)?.scrollIntoView({behavior:'smooth',block:'start'})})})}
-function renderFirebaseProducts(){const grid=document.getElementById('productGrid');if(!grid)return;let products=[];try{products=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}if(!Array.isArray(products)||!products.length)return;const q=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();const active=[...document.querySelectorAll('.chip')].find(x=>x.classList.contains('active'));const cat=active?.dataset.cat||'All';const list=products.filter(p=>(cat==='All'||p.cat===cat||p.group===cat)&&(!q||`${p.name||''} ${p.id||''} ${p.cat||''} ${p.group||''}`.toLowerCase().includes(q)));grid.innerHTML=list.map(p=>{const out=Number(p.stock)<=0,img=p.image||(p.images||[])[0]||'';return `<article class="product"><div class="productVisual"><span class="tag">${esc(p.tag||'NEW')}</span><button class="wish" onclick="toggleWish('${esc(p.id)}')">♡</button>${img?`<img class="productPhoto" src="${esc(img)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="art">👕</div>`}</div><div class="productInfo"><div class="productMeta"><span>${esc(String(p.group||p.cat||'FASHION').toUpperCase())} • ${esc(p.id)}</span><span>${out?'OUT OF STOCK':'★★★★★'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.desc||'Santosh Fashion Hub product.')}</p><div class="priceRow"><div><strong>₹${Number(p.price||0).toLocaleString('en-IN')}</strong>${Number(p.old)>0?`<span class="old">₹${Number(p.old).toLocaleString('en-IN')}</span>`:''}</div><button class="add" onclick="quickView('${esc(p.id)}')">View +</button></div></div></article>`}).join('');const empty=document.getElementById('emptyState');if(empty)empty.classList.toggle('hidden',list.length>0)}
+function wireMainCategoryButtons(){
+  const map={Men:'Men',Jeans:'Jeans',Kids:'Kids',Ladies:'Ladies',Jackets:'Jacket','T-Shirts':'T-Shirt'};
+  document.querySelectorAll('.categoryRail button').forEach(btn=>{
+    if(btn.dataset.sfhFilterWired)return;
+    btn.dataset.sfhFilterWired='1';
+    btn.addEventListener('click',()=>{
+      const label=btn.querySelector('b')?.textContent?.trim();
+      if(map[label]&&typeof window.setCategory==='function')window.setCategory(map[label]);
+    });
+  });
+}
+function renderFirebaseProducts(){
+  const grid=document.getElementById('productGrid');if(!grid)return;
+  let synced=[];try{synced=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){}
+  if(!Array.isArray(synced)||!synced.length)return;
+  if(Array.isArray(window.products))window.products=synced;
+  if(typeof window.renderProducts==='function')window.renderProducts();
+}
 function makeFingerprint(snap){return snap.docs.map(d=>{const p=d.data()||{},images=Array.isArray(p.images)?p.images.join('|'):(p.image||'');return `${d.id}:${p.updatedAt?.toMillis?.()||0}:${p.price||0}:${p.stock||0}:${p.name||''}:${images}`}).sort().join('||')}
 async function sync(){try{const snap=await getDocs(collection(db,'products'));let products=snap.docs.map(d=>normalise(d.data()||{},d.id));products=applyRealPhotos(products);localStorage.setItem(KEY,JSON.stringify(products));const fp=makeFingerprint(snap),old=sessionStorage.getItem(FINGERPRINT_KEY);sessionStorage.setItem(FINGERPRINT_KEY,fp);if(old!==null&&old!==fp){location.reload();return}renderFirebaseProducts()}catch(error){console.warn('Santosh Fashion Hub Firebase sync:',error);renderFirebaseProducts()}}
-function start(){setTimeout(()=>{installStorePortalStyle();installPortalHub();enhanceCollectionPhotos();enhanceCategoryRail();wireMainCategoryButtons();applyRealPhotosFromCache();renderFirebaseProducts();sync()},180)}
-function applyRealPhotosFromCache(){try{const p=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(p)&&p.length)localStorage.setItem(KEY,JSON.stringify(applyRealPhotos(p)))}catch(e){}}
+function start(){
+  enhanceCollectionPhotos();
+  enhanceCategoryRail();
+  applyRealPhotosFromCache();
+  renderFirebaseProducts();
+  sync();
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
