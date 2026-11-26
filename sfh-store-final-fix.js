@@ -91,8 +91,9 @@
       const view=card.querySelector('.priceRow .add');
       const id=view?extractId(view):(card.querySelector('.productMeta span')?.textContent.match(/•\s*([A-Za-z0-9_-]+)/)||[])[1];
       if(id) addButton(card,id);
-      card.querySelectorAll('img.productPhoto,.sfh-photo,.sfh-pp').forEach(fixBrokenImage);
+      card.querySelectorAll('img.productPhoto').forEach(fixBrokenImage);
     });
+    document.querySelectorAll('.sfh-photo,.sfh-cat-photo,.sfh-pp').forEach(fixBrokenImage);
   }
 
   function fixCollectionText(){
