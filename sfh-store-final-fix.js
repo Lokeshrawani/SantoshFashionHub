@@ -20,6 +20,7 @@
     .sfh-cart-actions .add{background:#0b1020!important;color:#fff!important}
     .sfh-cart-actions .viewBtn{background:#f4c95d!important;color:#17130a!important}
     .sfh-cart-actions .add:hover,.sfh-cart-actions .viewBtn:hover{transform:translateY(-1px)!important}
+    .sfh-cart-actions .add:disabled{opacity:.55!important;cursor:not-allowed!important;transform:none!important}
     .sfh-product-added{display:inline-block!important;margin-top:6px!important;font-size:10px!important;font-weight:900!important;color:#087443!important}
     @media(max-width:650px){.productPhoto{padding:8px!important}.sfh-cart-actions{width:100%!important}.sfh-cart-actions .add,.sfh-cart-actions .viewBtn{flex:1 1 120px!important}}
   `;
@@ -45,25 +46,33 @@
     }
     const view=wrap.querySelector('.add');
     if(view){view.classList.add('viewBtn');view.textContent='View Details';view.setAttribute('type','button')}
-    if(!wrap.querySelector('.sfh-add-cart')){
-      const b=document.createElement('button');b.type='button';b.className='add sfh-add-cart';b.textContent='Add to Cart';
-      b.addEventListener('click',e=>{
+    let add=wrap.querySelector('.sfh-add-cart');
+    if(!add){
+      add=document.createElement('button');add.type='button';add.className='add sfh-add-cart';
+      add.addEventListener('click',e=>{
         e.preventDefault();e.stopPropagation();
         const p=findProduct(id);
-        if(!p){return}
+        if(!p)return;
+        const saleReady=p.saleEnabled===true&&p.priceVerified===true&&Number(p.approvedPricePaise)===Math.round(Number(p.price||0)*100);
+        if(!saleReady){if(typeof window.toast==='function')window.toast('This product is not yet approved for online checkout.');return;}
         const qtyStock=Number(p.stock)||0;
         if(qtyStock<=0){if(typeof window.toast==='function')window.toast('Out of stock');return}
-        const size=Array.isArray(p.sizes)&&p.sizes.length?p.sizes[0]:'M';
+        const size=Array.isArray(p.sizes)&&p.sizes.length?p.sizes[0]:'Free Size';
         if(typeof window.addToCart==='function'){
           window.addToCart(id,size,1);
-          b.textContent='✓ Added';
-          setTimeout(()=>b.textContent='Add to Cart',1400);
+          add.textContent='✓ Added';
+          setTimeout(()=>{add.textContent='Add to Cart'},1400);
         }else if(typeof window.quickView==='function'){
           window.quickView(id);
         }
       });
-      wrap.insertBefore(b,wrap.firstChild);
+      wrap.insertBefore(add,wrap.firstChild);
     }
+    const product=findProduct(id);
+    const saleReady=!!product&&product.saleEnabled===true&&product.priceVerified===true&&Number(product.approvedPricePaise)===Math.round(Number(product.price||0)*100)&&Number(product.stock)>0;
+    add.disabled=!saleReady;
+    add.textContent=saleReady?'Add to Cart':(Number(product?.stock||0)<=0?'Out of Stock':'Price / Stock Check');
+    add.title=saleReady?'Add this verified product to your cart':'This product is not approved for online sale yet.';
   }
 
   function fixBrokenImage(img){
