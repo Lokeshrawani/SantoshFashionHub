@@ -23,7 +23,7 @@
       <div class="sfh-detail-grid">
         <div class="sfh-detail-image">${image}<div class="sfh-photo-badge">${p.tag||'PRODUCT'}</div></div>
         <div class="sfh-detail-info">
-          <div class="productMeta"><span>${String(p.group||'').toUpperCase()} • ${p.id}</span><span>★★★★★</span></div>
+          <div class="productMeta"><span>${String(p.group||'').toUpperCase()} • ${p.id}</span><span>PRODUCT DETAILS</span></div>
           <h2>${p.name}</h2>
           <p class="sfh-description">${p.desc||'Quality fashion from Santosh Fashion Hub.'}</p>
           <div class="sfh-price"><strong>${money(p.price)}</strong>${p.old?`<span class="old">${money(p.old)}</span>`:''}${d?`<b>${d}% OFF</b>`:''}</div>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Santosh Fashion Hub new season fashion edit</title>
+<desc id="desc">Editorial illustration of three fashion silhouettes in modern casual and occasion wear on a warm neutral background.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4eee5"/><stop offset=".55" stop-color="#e7d7c5"/><stop offset="1" stop-color="#d5bca6"/></linearGradient>
+ <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#243548"/><stop offset="1" stop-color="#101d2b"/></linearGradient>
+ <linearGradient id="rust" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c97958"/><stop offset="1" stop-color="#8d493b"/></linearGradient>
+ <linearGradient id="olive" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8c9870"/><stop offset="1" stop-color="#536349"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur stdDeviation="22"/></filter>
+ <pattern id="grain" width="90" height="90" patternUnits="userSpaceOnUse"><circle cx="10" cy="14" r="1" fill="#806a58" opacity=".09"/><circle cx="60" cy="61" r="1" fill="#806a58" opacity=".07"/></pattern>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/>
+<rect width="1600" height="1000" fill="url(#grain)"/>
+<circle cx="1330" cy="170" r="255" fill="#fff8ed" opacity=".48"/>
+<circle cx="280" cy="880" r="330" fill="#c29f82" opacity=".24"/>
+<path d="M0 820C330 760 600 850 880 800s500-95 720-25v225H0Z" fill="#bda58e" opacity=".24"/>
+<ellipse cx="880" cy="880" rx="570" ry="58" fill="#513b2d" opacity=".17" filter="url(#shadow)"/>
+<!-- left model -->
+<g transform="translate(250 110)">
+ <ellipse cx="250" cy="140" rx="78" ry="94" fill="#9e7056"/>
+ <path d="M174 125q18-110 100-98 68 9 76 96-45-42-85-40-48 1-91 42Z" fill="#302722"/>
+ <path d="M183 245q-45 13-66 93l-43 205q-9 39 27 46 36 7 49-28l65-150-3 290h170l-4-293 66 149q15 35 50 19 30-14 12-52l-83-190q-29-64-88-83Z" fill="url(#olive)"/>
+ <path d="M212 256q39 43 81 0l36 83-77 75-76-77Z" fill="#e7d6c4"/>
+ <path d="M205 710h70l-14 165h-87q-10-10 0-25Z" fill="#393a36"/>
+ <path d="M276 710h76l39 145q-2 18-20 20h-75l-24-165Z" fill="#4a4b45"/>
+ <path d="M178 870h94q24 18 2 30H145q-5-18 33-30ZM296 872h95q32 15 8 29h-95q-17-13-8-29Z" fill="#28231f"/>
+</g>
+<!-- center model -->
+<g transform="translate(640 35)">
+ <ellipse cx="300" cy="135" rx="82" ry="100" fill="#b98466"/>
+ <path d="M220 127q5-120 91-118 79 2 87 112-46-44-89-47-52-4-89 53Z" fill="#2b2422"/>
+ <path d="M226 245q-55 15-83 89l-62 188q-13 43 29 57 36 11 55-30l65-126 7 233h145l5-235 70 131q18 36 55 18 32-15 13-56L441 331q-30-71-93-89Z" fill="url(#navy)"/>
+ <path d="M252 249q47 44 95 0l-7 212-42 45-43-47Z" fill="#e9dfd2"/>
+ <path d="M295 275h12v204h-12z" fill="#b98d68" opacity=".7"/>
+ <path d="M236 646h75l-9 207h-86q-12-13-5-28Z" fill="#38332f"/>
+ <path d="M311 646h81l49 206q-1 20-20 24h-79l-31-230Z" fill="#393530"/>
+ <path d="M211 855h91q24 15 4 31H185q-7-18 26-31ZM341 856h98q28 12 10 30h-98q-18-12-10-30Z" fill="#211e1c"/>
+ <path d="M225 260q70 54 142 0" stroke="#fff" stroke-width="8" opacity=".26" fill="none"/>
+</g>
+<!-- right model -->
+<g transform="translate(1110 140)">
+ <ellipse cx="190" cy="125" rx="70" ry="86" fill="#b98466"/>
+ <path d="M120 122q-3-100 76-112 68 0 79 105-32-32-73-35-40-2-82 42Z" fill="#2d2521"/>
+ <path d="M129 225q60-46 122 0l48 145q17 57-11 128l-66 250H110l-59-250q-23-81 0-130Z" fill="url(#rust)"/>
+ <path d="M129 225q61 44 122 0l-7 70q-51 34-105 0Z" fill="#f0ded0"/>
+ <path d="M81 363q-31 8-47 58l-34 112q-7 31 22 40 30 8 42-24l48-111M294 365q35 10 48 57l33 112q7 31-22 40-30 8-42-24l-47-111" fill="none" stroke="#b98466" stroke-width="35" stroke-linecap="round"/>
+ <path d="M121 744h136l-5 126H126Z" fill="#8d493b"/>
+ <path d="M119 870h64q18 14 2 28h-82q-6-18 16-28ZM203 870h69q20 14 4 28h-83q-5-18 10-28Z" fill="#302822"/>
+</g>
+<!-- editorial accent -->
+<g fill="none" stroke="#946e51" opacity=".45">
+ <path d="M110 190c-40 90-34 185 10 265" stroke-width="2"/>
+ <path d="M1450 650c52-60 61-130 35-210" stroke-width="2"/>
+ <circle cx="120" cy="120" r="42" stroke-width="1.5"/>
+ <circle cx="1450" cy="820" r="55" stroke-width="1.5"/>
+</g>
+<g fill="#6e5744" opacity=".62" font-family="Georgia,serif">
+ <text x="74" y="78" font-size="20" letter-spacing="5">THE NEW SEASON EDIT</text>
+ <text x="74" y="108" font-family="Arial,sans-serif" font-size="10" letter-spacing="4">SANTOSH FASHION HUB</text>
+</g>
+</svg>

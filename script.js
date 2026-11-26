@@ -34,14 +34,72 @@ Object.defineProperties(window,{
 window.PHONE=PHONE;
 const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
 function save(){localStorage.setItem('sfh-products',JSON.stringify(products));localStorage.setItem('sfh-cart',JSON.stringify(cart));localStorage.setItem('sfh-wishlist',JSON.stringify(wishlist));updateCounts()}
-function updateCounts(){const n=cart.reduce((a,x)=>a+Number(x.qty||0),0),w=wishlist.length;document.querySelectorAll('#cartCount,#cartTitleCount,#mobileCartCount,#drawerCount').forEach(e=>e.textContent=n);document.querySelectorAll('#wishCount,#wishTitleCount,#wishDrawerCount').forEach(e=>e.textContent=w)}
+function updateCounts(){const n=cart.reduce((a,x)=>a+Number(x.qty||0),0),w=wishlist.length;document.querySelectorAll('#cartCount,#cartTitleCount,#mobileCartCount,#drawerCount').forEach(e=>e.textContent=n);document.querySelectorAll('#wishCount,#wishTitleCount,#wishDrawerCount,#mobileWishCount').forEach(e=>e.textContent=w)}
 const LOCAL_PRODUCT_IMAGES={M001:'assets/products/mens-premium-tshirt.svg',M002:'assets/products/mens-casual-shirt.svg',J001:'assets/products/mens-denim-jeans.svg',M003:'assets/products/mens-formal-trouser.svg',M004:'assets/products/mens-stylish-jacket.svg',K001:'assets/products/kids-trendy-wear.svg',K002:'assets/products/kids-tshirt.svg',L001:'assets/products/ladies-comfort-collection.svg',M005:'assets/products/mens-everyday-shirt.svg',J002:'assets/products/mens-comfort-denim.svg',K003:'assets/products/kids-casual-set.svg',L002:'assets/products/ladies-comfort-pack.svg'};
 function escapeAttr(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function productVisual(p){const fallback=LOCAL_PRODUCT_IMAGES[p.id]||'';const src=p.image||fallback;if(!src)return `<div class="art">${p.art||'👕'}</div>`;return `<img class="productPhoto" src="${escapeAttr(src)}" data-fallback-src="${escapeAttr(fallback)}" alt="${escapeAttr(p.name||'Fashion product')}" loading="lazy" decoding="async">`}
-function renderProducts(){let list=products.filter(p=>Number(p.stock)>0&&(category==='All'||p.cat===category||p.group===category)&&((p.name+' '+p.id+' '+p.cat+' '+p.group).toLowerCase().includes(search)));const sort=document.getElementById('sortSelect')?.value;if(sort==='low')list.sort((a,b)=>a.price-b.price);if(sort==='high')list.sort((a,b)=>b.price-a.price);if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));const grid=document.getElementById('productGrid');grid.innerHTML=list.map(p=>`<article class="product"><div class="productVisual"><span class="tag">${p.tag}</span><button class="wish ${wishlist.includes(p.id)?'active':''}" onclick="toggleWish('${p.id}')">${wishlist.includes(p.id)?'♥':'♡'}</button>${productVisual(p)}</div><div class="productInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>★★★★★</span></div><h3>${p.name}</h3><p>${p.desc}</p><div class="priceRow"><div><strong>${money(p.price)}</strong><span class="old">${money(p.old)}</span></div><button class="add" onclick="quickView('${p.id}')">View +</button></div></div></article>`).join('');document.getElementById('emptyState').classList.toggle('hidden',list.length>0)}
-function setCategory(c){category=c;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));document.getElementById('products').scrollIntoView({behavior:'smooth'});renderProducts()}
-document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>setCategory(b.dataset.cat)));document.getElementById('searchInput').addEventListener('input',e=>{search=e.target.value.toLowerCase().trim();renderProducts()});document.getElementById('clearSearch').addEventListener('click',()=>{document.getElementById('searchInput').value='';search='';renderProducts()});document.getElementById('sortSelect').addEventListener('change',renderProducts);
-function resetFilters(){category='All';search='';document.getElementById('searchInput').value='';document.getElementById('sortSelect').value='featured';document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.cat==='All'));renderProducts()}
+function renderProducts(){
+  const list=products.filter(p=>
+    Number(p.stock)>0&&
+    (category==='All'||p.cat===category||p.group===category)&&
+    ((p.name+' '+p.id+' '+p.cat+' '+p.group).toLowerCase().includes(search))
+  );
+  const sort=document.getElementById('sortSelect')?.value;
+  if(sort==='low')list.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+  if(sort==='high')list.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+  if(sort==='name')list.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+  const grid=document.getElementById('productGrid');
+  if(!grid)return;
+  grid.innerHTML=list.map(p=>{
+    const id=String(p.id||'').replace(/[^A-Za-z0-9_-]/g,'');
+    const price=Number(p.price)||0;
+    const old=Number(p.old)||0;
+    const discountPct=old>price&&old>0?Math.round((old-price)*100/old):0;
+    const categoryLabel=String(p.cat||p.group||'FASHION');
+    return `<article class="product" data-product-id="${escapeAttr(id)}">
+      <div class="productVisual">
+        <span class="tag">${escapeAttr(p.tag||'STYLE PICK')}</span>
+        <button class="wish ${wishlist.includes(p.id)?'active':''}" type="button" aria-label="${wishlist.includes(p.id)?'Remove from':'Add to'} wishlist: ${escapeAttr(p.name)}" onclick="toggleWish('${id}')">${wishlist.includes(p.id)?'♥':'♡'}</button>
+        ${productVisual(p)}
+      </div>
+      <div class="productInfo">
+        <div class="productMeta"><span>${escapeAttr(categoryLabel)}</span><span>${escapeAttr(id)}</span></div>
+        <h3>${escapeAttr(p.name||'Fashion favourite')}</h3>
+        <p>${escapeAttr(p.desc||'A thoughtful pick from Santosh Fashion Hub.')}</p>
+        <div class="priceRow">
+          <div><strong>${money(price)}</strong>${old>price?`<span class="old">${money(old)}</span>`:''}${discountPct?`<span class="sfh-discount">${discountPct}% OFF</span>`:''}</div>
+          <button class="add" type="button" aria-label="View details for ${escapeAttr(p.name)}" onclick="quickView('${id}')">Quick view <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+  const count=document.getElementById('sfhProductCount');
+  if(count)count.textContent=`${list.length} ${list.length===1?'style':'styles'} to explore`;
+  const empty=document.getElementById('emptyState');
+  if(empty)empty.classList.toggle('hidden',list.length>0);
+}
+function setCategory(c){
+  category=c;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));
+  document.querySelectorAll('[data-sfh-category]').forEach(x=>x.classList.toggle('active',x.dataset.sfhCategory===c));
+  document.getElementById('products')?.scrollIntoView({behavior:'smooth',block:'start'});
+  renderProducts();
+}
+window.renderProducts=renderProducts;
+window.setCategory=setCategory;
+document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>setCategory(b.dataset.cat)));
+document.querySelectorAll('[data-sfh-category]').forEach(b=>b.addEventListener('click',()=>setCategory(b.dataset.sfhCategory)));
+document.getElementById('searchInput').addEventListener('input',e=>{search=e.target.value.toLowerCase().trim();renderProducts()});
+document.getElementById('clearSearch').addEventListener('click',()=>{document.getElementById('searchInput').value='';search='';renderProducts()});
+document.getElementById('sortSelect').addEventListener('change',renderProducts);
+function resetFilters(){
+  category='All';search='';
+  document.getElementById('searchInput').value='';
+  document.getElementById('sortSelect').value='featured';
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.cat==='All'));
+  document.querySelectorAll('[data-sfh-category]').forEach(x=>x.classList.remove('active'));
+  renderProducts();
+}
 function toggleWish(id){wishlist=wishlist.includes(id)?wishlist.filter(x=>x!==id):[...wishlist,id];save();renderProducts();renderWishlist();toast(wishlist.includes(id)?'Added to wishlist ♥':'Removed from wishlist')}
 function openWishlist(){renderWishlist();document.getElementById('wishlistDrawer')?.classList.add('open');document.getElementById('overlay')?.classList.add('open')}
 function closeWishlist(){document.getElementById('wishlistDrawer')?.classList.remove('open');if(!document.getElementById('cartDrawer')?.classList.contains('open'))document.getElementById('overlay')?.classList.remove('open')}
@@ -51,7 +109,7 @@ function changeQty(id,size,delta){const i=cart.findIndex(x=>x.id===id&&x.size===
 function removeItem(id,size){cart=cart.filter(x=>!(x.id===id&&x.size===size));save();renderCart();toast('Item removed')}
 function renderCart(){const box=document.getElementById('cartItems');if(!box)return;cart=cart.filter(x=>{const p=products.find(y=>y.id===x.id);return p&&Number(p.stock)>0});if(!cart.length){box.innerHTML='<div class="empty"><div>🛒</div><h3>Your cart is empty</h3><p>Add a few products and come back here.</p></div>';document.getElementById('cartTotal').textContent='₹0';save();return}let sub=0;box.innerHTML=cart.map(x=>{const p=products.find(y=>y.id===x.id);x.qty=Math.min(x.qty,Number(p.stock));sub+=p.price*x.qty;return `<div class="cartItem"><div class="miniArt">${productVisual(p)}</div><div><h4>${p.name}</h4><small>${p.id} • Size ${x.size} • ${money(p.price)} • Stock ${p.stock}</small><div class="qty"><button onclick="changeQty('${x.id}','${x.size}',-1)">−</button><b>${x.qty}</b><button onclick="changeQty('${x.id}','${x.size}',1)">+</button><button class="remove" onclick="removeItem('${x.id}','${x.size}')">Remove</button></div></div><b>${money(p.price*x.qty)}</b></div>`}).join('');const total=Math.max(0,sub-discount);document.getElementById('cartTotal').textContent=money(total);save()}
 function openCart(){renderCart();document.getElementById('cartDrawer').classList.add('open');document.getElementById('overlay').classList.add('open')};function closeCart(){document.getElementById('cartDrawer').classList.remove('open');if(!document.getElementById('wishlistDrawer').classList.contains('open'))document.getElementById('overlay').classList.remove('open')};function closeAllPanels(){closeCart();closeWishlist();closeQuickView()}
-function quickView(id){const p=products.find(x=>x.id===id);if(!p)return;const out=Number(p.stock)<=0;document.getElementById('quickViewContent').innerHTML=`<div class="quickGrid"><div class="quickArt">${productVisual(p,true)}</div><div class="quickInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>★★★★★</span></div><h2>${p.name}</h2><p>${p.desc}</p><h3>${money(p.price)} <span class="old">${money(p.old)}</span></h3>${out?'<p><strong>🔴 Out of Stock</strong></p>':'<><b>Choose size</b><div class="sizeBtns">'+p.sizes.map((s,i)=>`<button class="${i===0?'selected':''}" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')+'</div></>'}<button class="btn primary full" ${out?'disabled':''} onclick="addQuickToCart('${p.id}')">${out?'Out of Stock':'Add to Cart'}</button><a class="btn outline full" style="margin-top:8px" target="_blank" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please share available sizes, price and delivery details.')}">💬 Ask on WhatsApp</a></div></div>`;document.getElementById('quickView').classList.add('open')}
+function quickView(id){const p=products.find(x=>x.id===id);if(!p)return;const out=Number(p.stock)<=0;document.getElementById('quickViewContent').innerHTML=`<div class="quickGrid"><div class="quickArt">${productVisual(p,true)}</div><div class="quickInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>STYLE DETAILS</span></div><h2>${p.name}</h2><p>${p.desc}</p><h3>${money(p.price)} <span class="old">${money(p.old)}</span></h3>${out?'<p><strong>🔴 Out of Stock</strong></p>':'<><b>Choose size</b><div class="sizeBtns">'+p.sizes.map((s,i)=>`<button class="${i===0?'selected':''}" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')+'</div></>'}<button class="btn primary full" ${out?'disabled':''} onclick="addQuickToCart('${p.id}')">${out?'Out of Stock':'Add to Cart'}</button><a class="btn outline full" style="margin-top:8px" target="_blank" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please share available sizes, price and delivery details.')}">💬 Ask on WhatsApp</a></div></div>`;document.getElementById('quickView').classList.add('open')}
 function selectSize(el){el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));el.classList.add('selected')};function addQuickToCart(id){const s=document.querySelector('#quickView .sizeBtns .selected')?.dataset.size||'M';addToCart(id,s,1);closeQuickView();openCart()};function closeQuickView(){document.getElementById('quickView')?.classList.remove('open')}function closeQuick(){closeQuickView()}
 function applyCoupon(){const c=document.getElementById('coupon').value.trim().toUpperCase();if(c==='WELCOME10'){discount=50;toast('WELCOME10 applied: ₹50 demo discount');renderCart()}else{discount=0;toast('Demo coupon: try WELCOME10')}}
 function checkoutWhatsApp(){if(!cart.length){toast('Your cart is empty');return}let lines=cart.map(x=>{const p=products.find(y=>y.id===x.id);return `${p.id} - ${p.name} | Size: ${x.size} | Qty: ${x.qty} | ${money(p.price*x.qty)}`});let total=cart.reduce((a,x)=>a+products.find(p=>p.id===x.id).price*x.qty,0)-discount;const text=`Hello Santosh Fashion Hub 👋%0A%0A*New Shopping Order*%0A${encodeURIComponent(lines.join('\\n'))}%0A%0A*Estimated Total:* ${encodeURIComponent(money(total))}%0A%0APlease confirm stock, final price, shipping charge and payment/COD availability.`;window.open(`https://wa.me/${PHONE}?text=${text}`,'_blank')}
@@ -103,7 +161,7 @@ updateCounts();renderProducts();renderCart();
   window.sfhGalleryGo=function(index){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const imgs=sfhImages(p);if(!imgs.length)return;const i=Math.max(0,Math.min(Number(index)||0,imgs.length-1));g.dataset.galleryIndex=i;const img=g.querySelector('#sfhGalleryMainImg');if(img){img.src=imgs[i];img.alt=`${p.name} - Photo ${i+1}`}const pos=g.querySelector('#sfhGalleryPos');if(pos)pos.textContent=String(i+1);g.querySelectorAll('.sfhGalleryThumb').forEach((b,n)=>b.classList.toggle('active',n===i))};
   window.sfhGalleryPrev=function(){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const n=sfhImages(p).length;const cur=Number(g.dataset.galleryIndex)||0;if(n)sfhGalleryGo(cur<=0?n-1:cur-1)};
   window.sfhGalleryNext=function(){const g=document.querySelector('#quickView .sfhGallery');if(!g)return;const p=products.find(x=>x.id===g.dataset.galleryId);const n=sfhImages(p).length;const cur=Number(g.dataset.galleryIndex)||0;if(n)sfhGalleryGo((cur+1)%n)};
-  window.quickView=function(id){const p=products.find(x=>x.id===id);if(!p)return;const out=Number(p.stock)<=0;document.getElementById('quickViewContent').innerHTML=`<div class="quickGrid"><div class="quickArt">${renderGallery(p)}</div><div class="quickInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>★★★★★</span></div><h2>${p.name}</h2><p>${p.desc}</p><h3>${money(p.price)} <span class="old">${money(p.old)}</span></h3>${out?'<p><strong>🔴 Out of Stock</strong></p>':'<><b>Choose size</b><div class="sizeBtns">'+p.sizes.map((s,i)=>`<button class="${i===0?'selected':''}" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')+'</div></>'}<button class="btn primary full" ${out?'disabled':''} onclick="addQuickToCart('${p.id}')">${out?'Out of Stock':'Add to Cart'}</button><a class="btn outline full" style="margin-top:8px" target="_blank" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please share available sizes, price and delivery details.')}">💬 Ask on WhatsApp</a></div></div>`;document.getElementById('quickView').classList.add('open')};
+  window.quickView=function(id){const p=products.find(x=>x.id===id);if(!p)return;const out=Number(p.stock)<=0;document.getElementById('quickViewContent').innerHTML=`<div class="quickGrid"><div class="quickArt">${renderGallery(p)}</div><div class="quickInfo"><div class="productMeta"><span>${p.group.toUpperCase()} • ${p.id}</span><span>PRODUCT DETAILS</span></div><h2>${p.name}</h2><p>${p.desc}</p><h3>${money(p.price)} <span class="old">${money(p.old)}</span></h3>${out?'<p><strong>🔴 Out of Stock</strong></p>':'<><b>Choose size</b><div class="sizeBtns">'+p.sizes.map((s,i)=>`<button class="${i===0?'selected':''}" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')+'</div></>'}<button class="btn primary full" ${out?'disabled':''} onclick="addQuickToCart('${p.id}')">${out?'Out of Stock':'Add to Cart'}</button><a class="btn outline full" style="margin-top:8px" target="_blank" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am interested in '+p.name+' ('+p.id+'). Please share available sizes, price and delivery details.')}">💬 Ask on WhatsApp</a></div></div>`;document.getElementById('quickView').classList.add('open')};
 })();
 /* SFH_FIREBASE_STORE_BRIDGE */
 // Firebase storefront sync is loaded lazily after the first page paint from index.html.
