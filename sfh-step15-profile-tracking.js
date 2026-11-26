@@ -1,34 +1,24 @@
-/* Santosh Fashion Hub — Step 15: Customer Profile + Order Tracking */
+/* Santosh Fashion Hub — central account and order-tracking shortcut.
+   Customer profile/order data is stored in Firebase, not localStorage on one device. */
 (function(){
-  const KEY_PROFILE='sfh-customer-profile';
-  const KEY_ORDERS='sfh-orders';
-  const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));
-  function getProfile(){try{return JSON.parse(localStorage.getItem(KEY_PROFILE)||'null')||{};}catch(e){return {};}}
-  function getOrders(){try{const v=JSON.parse(localStorage.getItem(KEY_ORDERS)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
-  function saveProfile(p){localStorage.setItem(KEY_PROFILE,JSON.stringify(p));}
-  function ensurePanel(){
-    if(document.getElementById('sfhProfilePanel'))return;
-    const el=document.createElement('div');el.id='sfhProfilePanel';el.className='sfh15-modal';
-    el.innerHTML=`<div class="sfh15-card"><button class="sfh15-close" onclick="sfh15Close()">×</button><div class="sfh15-head"><span>MY ACCOUNT</span><h2>Customer Profile</h2><p>Save your shopping details on this device for faster checkout.</p></div><form id="sfh15Form" class="sfh15-form"><label>Full Name<input id="sfh15Name" maxlength="60" required></label><label>Mobile Number<input id="sfh15Mobile" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" required></label><label>Email<input id="sfh15Email" type="email" maxlength="120"></label><label>PIN Code<input id="sfh15Pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}"></label><label>City / Village<input id="sfh15City" maxlength="80"></label><label class="sfh15-full">Address<textarea id="sfh15Address" maxlength="220" rows="3"></textarea></label><div class="sfh15-actions"><button class="btn primary" type="submit">Save Profile</button><button class="btn outline" type="button" onclick="sfh15Clear()">Clear</button></div><p id="sfh15Msg" class="sfh15-msg"></p></form></div>`;
-    el.addEventListener('click',e=>{if(e.target===el)window.sfh15Close()});document.body.appendChild(el);
-    document.getElementById('sfh15Form').addEventListener('submit',e=>{e.preventDefault();const p={name:document.getElementById('sfh15Name').value.trim(),mobile:document.getElementById('sfh15Mobile').value.trim(),email:document.getElementById('sfh15Email').value.trim(),pin:document.getElementById('sfh15Pin').value.trim(),city:document.getElementById('sfh15City').value.trim(),address:document.getElementById('sfh15Address').value.trim(),updatedAt:new Date().toISOString()};const msg=document.getElementById('sfh15Msg');if(!/^[0-9]{10}$/.test(p.mobile)){msg.textContent='Enter a valid 10-digit mobile number.';msg.style.color='#b42318';return;}saveProfile(p);msg.textContent='Profile saved on this device ✓';msg.style.color='#087443';renderProfile();});
-  }
-  function fill(){ensurePanel();const p=getProfile();const map={Name:'name',Mobile:'mobile',Email:'email',Pin:'pin',City:'city',Address:'address'};Object.entries(map).forEach(([k,v])=>{const e=document.getElementById('sfh15'+k);if(e)e.value=p[v]||''});}
-  window.sfh15Open=function(){fill();document.getElementById('sfhProfilePanel').classList.add('open');};
-  window.sfh15Close=function(){document.getElementById('sfhProfilePanel')?.classList.remove('open');};
-  window.sfh15Clear=function(){localStorage.removeItem(KEY_PROFILE);fill();document.getElementById('sfh15Msg').textContent='Profile cleared.';renderProfile();};
-  function statusMeta(s){const x=String(s||'Pending').toLowerCase();if(x==='delivered')return ['Delivered','done'];if(x==='cancelled')return ['Cancelled','bad'];if(x==='shipped')return ['Shipped','active'];if(x==='confirmed')return ['Confirmed','active'];return ['Pending','pending'];}
-  function renderOrdersBox(){
-    const host=document.getElementById('sfh15Orders');if(!host)return;const orders=getOrders().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-    if(!orders.length){host.innerHTML='<div class="sfh15-empty">No orders saved on this device yet.<br><small>Place an order from the website to see tracking here.</small></div>';return;}
-    host.innerHTML=orders.map(o=>{const [label,cls]=statusMeta(o.status);const items=Array.isArray(o.items)?o.items:[];return `<article class="sfh15-order"><div class="sfh15-order-top"><div><strong>${esc(o.id||'SFH-ORDER')}</strong><small>${esc(o.createdAt?new Date(o.createdAt).toLocaleString('en-IN'):'')}</small></div><span class="sfh15-status ${cls}">${label}</span></div><div class="sfh15-order-items">${items.map(i=>`<div><span>${esc(i.name||i.productName||i.id||'Item')} • Size ${esc(i.size||'-')} × ${Number(i.qty||1)}</span><b>₹${Number(i.total||((Number(i.price)||0)*(Number(i.qty)||1))||0).toLocaleString('en-IN')}</b></div>`).join('')}</div><div class="sfh15-track"><i class="${['Pending','Confirmed','Shipped','Delivered'].includes(o.status)?'on':''}">1</i><span></span><i class="${['Confirmed','Shipped','Delivered'].includes(o.status)?'on':''}">2</i><span></span><i class="${['Shipped','Delivered'].includes(o.status)?'on':''}">3</i><span></span><i class="${o.status==='Delivered'?'on':''}">4</i></div><div class="sfh15-track-labels"><span>Pending</span><span>Confirmed</span><span>Shipped</span><span>Delivered</span></div><div class="sfh15-order-bottom"><b>Estimated Total: ₹${Number(o.total||0).toLocaleString('en-IN')}</b><a class="btn outline" target="_blank" rel="noopener" href="https://wa.me/919835567894?text=${encodeURIComponent('Hello Santosh Fashion Hub, I am asking about order '+(o.id||'')+'. Current status: '+(o.status||'Pending'))}">💬 Ask Shop</a></div></article>`}).join('');
-  }
-  window.sfh15Render=renderOrdersBox;
   function inject(){
-    const products=document.getElementById('products');if(!products||document.getElementById('sfh15AccountBar'))return;
-    const bar=document.createElement('section');bar.id='sfh15AccountBar';bar.className='section sfh15-account-section';bar.innerHTML=`<div class="sectionTitle"><div><span class="eyebrow">MY ACCOUNT</span><h2>Profile & Order Tracking</h2><p class="muted">Save your details and track orders stored on this browser.</p></div><button class="btn primary" onclick="sfh15Open()">👤 Edit Profile</button></div><div class="sfh15-account-grid"><div class="sfh15-profile-mini"><div class="sfh15-avatar">👤</div><div><h3 id="sfh15ProfileName">Guest Shopper</h3><p id="sfh15ProfileMeta">No profile saved yet.</p></div></div><div class="sfh15-orders-mini"><div class="sfh15-mini-head"><b>Recent Orders</b><a href="#sfh15AccountBar" onclick="document.getElementById('sfh15Orders')?.scrollIntoView({behavior:'smooth'})">View all</a></div><div id="sfh15Orders"></div></div></div>`;products.parentNode.insertBefore(bar,products);renderProfile();renderOrdersBox();
+    const products=document.getElementById("products");
+    if(!products||document.getElementById("sfh15AccountBar"))return;
+    const section=document.createElement("section");
+    section.id="sfh15AccountBar";
+    section.className="section sfh-business-account-callout";
+    section.innerHTML=`
+      <div>
+        <span class="eyebrow">YOUR SHOPPING ACCOUNT</span>
+        <h2>All your orders, in one place</h2>
+        <p>Sign in to see order history, payment confirmation, courier details and delivery updates across your devices.</p>
+      </div>
+      <div class="sfh-business-account-actions">
+        <a class="btn outline" href="./sfh-step13-orders.html">📦 Track my orders</a>
+        <button class="btn primary" type="button" data-account-open>👤 My account</button>
+      </div>`;
+    products.parentNode.insertBefore(section,products);
   }
-  function renderProfile(){const p=getProfile();const n=document.getElementById('sfh15ProfileName'),m=document.getElementById('sfh15ProfileMeta');if(!n||!m)return;n.textContent=p.name||'Guest Shopper';m.textContent=p.mobile?(p.mobile+(p.city?' • '+p.city:'')):'No profile saved yet.';}
-  document.addEventListener('DOMContentLoaded',()=>{inject();setTimeout(inject,300);});
-  window.addEventListener('storage',()=>{renderProfile();renderOrdersBox();});
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",inject,{once:true});
+  else inject();
 })();

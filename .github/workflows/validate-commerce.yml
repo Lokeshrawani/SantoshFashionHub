@@ -1,0 +1,51 @@
+name: Validate commerce implementation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "*.js"
+      - "*.html"
+      - "firebase.json"
+      - ".firebaserc"
+      - "firestore.rules"
+      - "firestore.indexes.json"
+      - ".github/workflows/validate-commerce.yml"
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "*.js"
+      - "*.html"
+      - "firebase.json"
+      - ".firebaserc"
+      - "firestore.rules"
+      - "firestore.indexes.json"
+      - ".github/workflows/validate-commerce.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install backend dependencies
+        run: npm install --prefix functions
+      - name: Check Firebase Functions syntax
+        run: npm --prefix functions run check
+      - name: Check browser module syntax
+        shell: bash
+        run: |
+          set -e
+          for file in sfh-production-commerce.js sfh-admin-commerce.js sfh-step14-account.js; do
+            node --check --input-type=module < "$file"
+          done
+      - name: Validate Firebase configuration JSON
+        run: |
+          node -e "for (const f of ['firebase.json','.firebaserc','firestore.indexes.json','functions/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('Firebase JSON files are valid')"

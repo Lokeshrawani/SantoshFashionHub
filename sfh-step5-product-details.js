@@ -11,6 +11,7 @@
     const p=(window.products||[]).find(x=>x.id===id);
     if(!p) return;
     const out=Number(p.stock)<=0;
+    const saleReady=p.saleEnabled===true&&p.priceVerified===true&&Number(p.approvedPricePaise)===Math.round(Number(p.price||0)*100)&&!out;
     const sizes=Array.isArray(p.sizes)&&p.sizes.length?p.sizes:['Free Size'];
     const d=discountPct(p);
     const first=sizes[0];
@@ -28,14 +29,14 @@
           <p class="sfh-description">${p.desc||'Quality fashion from Santosh Fashion Hub.'}</p>
           <div class="sfh-price"><strong>${money(p.price)}</strong>${p.old?`<span class="old">${money(p.old)}</span>`:''}${d?`<b>${d}% OFF</b>`:''}</div>
           <div class="sfh-stock ${out?'out':''}">${out?'🔴 Out of Stock':`🟢 In Stock • ${Number(p.stock)} available`}</div>
-          ${out?'':`
+          ${out?'':saleReady?`
           <div class="sfh-field"><label>Choose Size</label><div class="sizeBtns sfh-sizes">${sizes.map((s,i)=>`<button class="${i===0?'selected':''}" type="button" data-size="${s}" onclick="selectSize(this)">${s}</button>`).join('')}</div></div>
           <div class="sfh-field"><label>Quantity</label><div class="sfh-qty"><button type="button" onclick="sfhChangeDetailQty(-1)">−</button><strong id="sfhDetailQty">1</strong><button type="button" onclick="sfhChangeDetailQty(1)">+</button></div></div>
           <div class="sfh-actions">
             <button class="btn primary full" onclick="sfhAddDetailToCart('${p.id}')">🛒 Add to Cart</button>
             <button class="btn sfh-buy full" onclick="sfhBuyNow('${p.id}')">⚡ Buy Now</button>
           </div>
-          `}
+          `:'<div class="sfh-stock">Price and size-level stock are being verified for online checkout. Please ask the shop for confirmation.</div>'}
           <a class="btn outline full" style="margin-top:9px" target="_blank" rel="noopener" href="${wa}">💬 Ask on WhatsApp</a>
           <div class="sfh-meta-box"><span>Product ID</span><b>${p.id}</b><span>Category</span><b>${p.cat||p.group||'Fashion'}</b></div>
         </div>
@@ -68,17 +69,24 @@
   };
 
   window.sfhAddDetailToCart=function(id){
-    const d=window.__sfhDetail||{size:'M',qty:1};
+    const d=window.__sfhDetail||{size:'Free Size',qty:1};
+    const p=(window.products||[]).find(x=>x.id===id);
+    const saleReady=p&&p.saleEnabled===true&&p.priceVerified===true&&Number(p.approvedPricePaise)===Math.round(Number(p.price||0)*100)&&Number(p.stock)>0;
+    if(!saleReady){if(typeof window.toast==='function')window.toast('This product is not yet approved for online checkout.');return;}
     if(typeof window.addToCart==='function') window.addToCart(id,d.size,d.qty);
     if(typeof window.closeQuickView==='function') window.closeQuickView();
     if(typeof window.openCart==='function') window.openCart();
   };
 
   window.sfhBuyNow=function(id){
-    const d=window.__sfhDetail||{size:'M',qty:1};
+    const d=window.__sfhDetail||{size:'Free Size',qty:1};
     const p=(window.products||[]).find(x=>x.id===id); if(!p) return;
-    const total=Number(p.price||0)*Number(d.qty||1);
-    const text=`Hello Santosh Fashion Hub 👋\n\n*Buy Now Request*\nProduct: ${p.name}\nProduct ID: ${p.id}\nSize: ${d.size}\nQuantity: ${d.qty}\nPrice: ${money(total)}\n\nPlease confirm final price, stock, shipping charge and payment/COD availability.`;
-    window.open(`https://wa.me/${window.PHONE||'919835567894'}?text=${encodeURIComponent(text)}`,'_blank');
+    const saleReady=p.saleEnabled===true&&p.priceVerified===true&&Number(p.approvedPricePaise)===Math.round(Number(p.price||0)*100)&&Number(p.stock)>0;
+    if(!saleReady){if(typeof window.toast==='function')window.toast('This product is not yet approved for online checkout.');return;}
+    window.cart=[];
+    try{localStorage.setItem('sfh-cart','[]')}catch(e){}
+    if(typeof window.addToCart==='function')window.addToCart(id,d.size,d.qty);
+    if(typeof window.closeQuickView==='function')window.closeQuickView();
+    if(typeof window.sfhOpenProductionCheckout==='function')window.sfhOpenProductionCheckout();
   };
 })();

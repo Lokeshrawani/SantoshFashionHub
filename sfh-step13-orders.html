@@ -1,18 +1,131 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Santosh Fashion Hub — Step 13 Orders</title>
-<style>:root{--ink:#0b1020;--gold:#f4c95d;--paper:#f5f6fa;--line:#dfe3ea;--muted:#667085;--ok:#087443;--bad:#b42318}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,Arial}.wrap{max-width:1050px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.top h1{margin:4px 0;font-size:28px}.top p{margin:0;color:var(--muted);font-size:13px}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 13px;border-radius:10px;text-decoration:none;font-weight:900}.gold{background:var(--gold);border-color:var(--gold)}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:18px}.status{padding:12px 14px;border-radius:12px;background:#eef1f6;font-size:12px;font-weight:800}.ok{background:#eaf8ef;color:var(--ok)}.bad{background:#fdecec;color:var(--bad)}.order{border-top:1px solid var(--line);padding:16px 0}.order:first-child{border-top:0}.head{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.id{font-weight:950}.date{font-size:11px;color:var(--muted)}.pill{padding:6px 9px;border-radius:99px;font-size:10px;font-weight:900;background:#eef1f6}.items{margin:10px 0}.item{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:12px}.customer{font-size:12px;color:#445066;line-height:1.6}.total{font-size:18px;font-weight:950;text-align:right}@media(max-width:600px){.wrap{padding:12px}.top h1{font-size:22px}.card{padding:14px}.item{align-items:flex-start}}</style></head>
-<body><main class="wrap"><header class="top"><div><span style="font-size:10px;font-weight:950;letter-spacing:2px;color:#6548d8">SANTOSH FASHION HUB</span><h1>My Online Orders</h1><p>Central Firestore orders for your signed-in customer account.</p></div><a class="btn gold" href="./index.html">← Store</a></header>
-<section class="card"><div id="status" class="status">Checking Firebase…</div><div id="orders" style="margin-top:12px"></div></section></main>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#211d1a">
+<title>Santosh Fashion Hub | My Orders & Tracking</title>
+<style>
+:root{--ink:#211d1a;--paper:#f7f5f2;--line:#e6e1db;--muted:#776f68;--gold:#9c7956;--green:#176b35;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,Arial,sans-serif}
+a{color:inherit}.wrap{max-width:1040px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.brand{font-size:10px;letter-spacing:2px;font-weight:950;color:var(--gold)}h1{font-size:30px;margin:5px 0}.top p{font-size:12px;color:var(--muted);margin:0}.top a{display:inline-block;padding:11px 15px;border-radius:999px;background:var(--ink);color:white;text-decoration:none;font-size:11px;font-weight:900}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:18px}.status{padding:12px;border-radius:11px;background:#f2f0ed;font-size:12px;color:#514941;line-height:1.5}.status.ok{background:#e9f5ec;color:var(--green)}.status.bad{background:#fff0ef;color:var(--red)}
+.auth-form{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}.auth-form label{display:grid;gap:5px;font-size:11px;font-weight:850}.auth-form input{border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}.auth-actions{grid-column:1/-1;display:flex;gap:9px;flex-wrap:wrap}.auth-actions button{border:0;border-radius:999px;padding:11px 15px;background:var(--ink);color:#fff;font-weight:900;cursor:pointer}.auth-actions button.secondary{background:#eeeae5;color:var(--ink)}.auth-secondary{font-size:11px;border:0;background:transparent;color:var(--gold);font-weight:900;cursor:pointer}
+.orders{display:grid;gap:14px;margin-top:14px}.order{border:1px solid var(--line);border-radius:16px;background:#fff;padding:17px}.order-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}.order-id{font-size:13px;font-weight:950}.order-date{font-size:10px;color:var(--muted);margin-top:5px}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#f2eee8;font-size:10px;font-weight:950}.pill.good{background:#e8f4eb;color:var(--green)}.pill.bad{background:#fdecec;color:var(--red)}
+.order-meta{margin-top:12px;font-size:11px;color:#5c554e;line-height:1.65}.items{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:13px 0;padding:9px 0}.item{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:11px}.item small{display:block;color:var(--muted);margin-top:3px}.total{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:950}.total strong{font-size:19px}
+.timeline{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:16px 0 4px}.step{position:relative;text-align:center;color:#aaa29a;font-size:9px;font-weight:800}.step:before{content:"";display:block;width:13px;height:13px;border-radius:50%;background:#e5e0da;margin:0 auto 7px;position:relative;z-index:1}.step:after{content:"";position:absolute;top:5px;left:calc(-50% - 2px);width:calc(100% + 4px);height:3px;background:#e5e0da}.step:first-child:after{display:none}.step.done{color:var(--green)}.step.done:before,.step.done:after{background:var(--green)}
+.tracking{padding:12px;border-radius:12px;background:#faf9f7;margin-top:12px;font-size:11px;line-height:1.7}.tracking a{font-weight:900;color:#765638}.tracking b{display:inline-block;min-width:118px}.empty{text-align:center;padding:40px 15px;color:var(--muted);border:1px dashed #d8d1c9;border-radius:14px}.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:5px}
+@media(max-width:650px){.wrap{padding:14px}h1{font-size:24px}.auth-form{grid-template-columns:1fr}.auth-actions{grid-column:auto}.timeline{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:12px}.step:after{display:none}.item{align-items:flex-start}.order{padding:13px}}
+</style>
+<script src="./firebase-config.js?v=20261126-3"></script>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div><div class="brand">SANTOSH FASHION HUB</div><h1>My Orders & Tracking</h1><p>Sign in to see your orders and the latest delivery status.</p></div><a href="./index.html">← Continue shopping</a></header>
+<section class="panel">
+  <div id="authStatus" class="status">Connecting to customer account…</div>
+  <div id="authArea">
+    <form id="authForm" class="auth-form">
+      <label>Email address<input id="email" type="email" autocomplete="email" required></label>
+      <label>Password<input id="password" type="password" autocomplete="current-password" minlength="6" required></label>
+      <div class="auth-actions"><button type="submit">Sign in</button><button class="secondary" type="button" id="signup">Create account</button><button class="secondary" type="button" id="reset">Forgot password</button></div>
+    </form>
+    <div id="authMessage" class="status" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+  <div id="signedIn" hidden></div>
+</section>
+<section class="panel"><div style="font-size:10px;font-weight:950;letter-spacing:1.5px;color:#9c7956">ORDER HISTORY</div><h2 style="margin:5px 0 0;font-size:21px">Your purchases</h2><div id="orders" class="orders"><div class="empty">Sign in to securely load your orders.</div></div></section>
+</main>
 <script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
-import {getFirestore,collection,query,where,getDocs,orderBy} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
-const status=document.getElementById('status'), box=document.getElementById('orders');
-const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
-const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));
-function ready(c){return c&&Object.values(c).every(v=>typeof v==='string'&&v.trim()&&!/^YOUR_/i.test(v))}
-try{await import('./firebase-config.js');const cfg=window.SFH_FIREBASE_CONFIG;if(!ready(cfg)){status.className='status bad';status.textContent='⚠️ Firebase config is not connected yet.'}
-else{const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);onAuthStateChanged(auth,async user=>{if(!user){status.className='status bad';status.textContent='Please sign in first on Step 12.';box.innerHTML='<p><a class="btn gold" href="./sfh-step12-firebase-auth.html">Open Customer Login</a></p>';return}status.className='status ok';status.textContent='✅ Signed in as '+(user.email||user.uid);try{const q=query(collection(db,'orders'),where('uid','==',user.uid),orderBy('createdAt','desc'));const snap=await getDocs(q);if(!snap.size){box.innerHTML='<p>No central online orders found yet.</p>';return}box.innerHTML=snap.docs.map(d=>{const o=d.data(),items=Array.isArray(o.items)?o.items:[];return `<article class="order"><div class="head"><div><div class="id">Order ${esc(d.id)}</div><div class="date">${o.createdAt?.toDate?o.createdAt.toDate().toLocaleString('en-IN'):'Date pending'}</div></div><span class="pill">${esc(o.status||'Pending')}</span></div><div class="customer">${esc(o.customer?.name)} • ${esc(o.customer?.mobile)}<br>${esc(o.customer?.city)} • PIN ${esc(o.customer?.pin)}</div><div class="items">${items.map(x=>`<div class="item"><span>${esc(x.name)} • ${esc(x.size)} × ${x.qty}</span><b>${money(x.lineTotal)}</b></div>`).join('')}</div><div class="total">${money(o.total)}</div></article>`}).join('')}catch(e){status.className='status bad';status.textContent='Could not load orders. Check Firestore rules and indexes.';box.innerHTML='<p>'+esc(e.message)+'</p>'}})}
-}catch(e){status.className='status bad';status.textContent='Firebase initialization failed.';box.innerHTML='<p>'+esc(e.message)+'</p>'}
-</script></body></html>
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,signOut} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {getFirestore,collection,query,where,orderBy,onSnapshot,doc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=value=>"₹"+Number(value||0).toLocaleString("en-IN");
+let auth,db,stopOrders=null,currentUser=null;
+function status(message,kind=""){ $("authStatus").textContent=message;$("authStatus").className="status "+kind; }
+function dateText(value){try{if(value?.toDate)return value.toDate().toLocaleString("en-IN");if(value?.seconds)return new Date(value.seconds*1000).toLocaleString("en-IN");return value?new Date(value).toLocaleString("en-IN"):"—"}catch(_){return "—"}}
+function timelineSteps(order){
+  const labels=["Order received","Confirmed","Processing","Packed","Shipped","Out for delivery","Delivered"];
+  const current=order.status==="Pending"||order.status==="Order received"?0:labels.indexOf(order.status);
+  if(order.status==="Cancelled"||order.status==="Payment review required"||order.status==="Payment cancelled"||order.status==="Payment expired"||order.status==="Payment not completed")return labels.map((label,i)=>({label,done:false})).slice(0,4);
+  const timeline=Array.isArray(order.timeline)?order.timeline:[];
+  const furthest=Math.max(current,...timeline.map(item=>labels.indexOf(item.status)).filter(i=>i>=0));
+  return labels.map((label,i)=>({label,done:i<=furthest}));
+}
+function renderOrder(docSnap){
+  const order={firestoreId:docSnap.id,...docSnap.data()};
+  const customer=order.customer&&typeof order.customer==="object"?order.customer:{name:order.customer||order.name,mobile:order.mobile,pin:order.pin,city:order.city,address:order.address};
+  const items=Array.isArray(order.items)?order.items:[];
+  const steps=timelineSteps(order);
+  const tracking=order.tracking||{};
+  const statusClass=order.status==="Delivered"?"good":order.status==="Cancelled"?"bad":"";
+  const trackingContent=(tracking.courier||tracking.trackingNumber||tracking.trackingUrl||tracking.estimatedDelivery||tracking.note)
+    ? `<div class="tracking"><div><b>Courier</b> ${esc(tracking.courier||"To be confirmed")}</div><div><b>Tracking number</b> ${esc(tracking.trackingNumber||"Not assigned yet")}</div><div><b>Expected delivery</b> ${esc(tracking.estimatedDelivery||"To be confirmed")}</div>${tracking.trackingUrl?`<div><b>Track shipment</b><a href="${esc(tracking.trackingUrl)}" target="_blank" rel="noopener">Open courier tracking ↗</a></div>`:""}${tracking.note?`<div><b>Shop update</b> ${esc(tracking.note)}</div>`:""}</div>`
+    : '<div class="tracking">Courier and tracking details will appear here after dispatch.</div>';
+  return `<article class="order">
+    <div class="order-head"><div><div class="order-id">${esc(order.id||docSnap.id)}</div><div class="order-date">${dateText(order.createdAt)}</div></div><span class="pill ${statusClass}">${esc(order.status||"Order received")}</span></div>
+    <div class="order-meta">Payment: <b>${esc(order.paymentMethod==="razorpay"?"Online payment":"Cash on Delivery")}</b> • Payment status: <b>${esc(order.paymentStatus||"Pending")}</b><br>Delivery to: ${esc(customer.name||"")} • ${esc(customer.mobile||"")}<br>${esc(customer.address||"")}, ${esc(customer.city||"")} — PIN ${esc(customer.pin||"")}</div>
+    <div class="timeline">${steps.map(step=>`<div class="step ${step.done?"done":""}">${esc(step.label)}</div>`).join("")}</div>
+    <div class="items">${items.map(item=>`<div class="item"><span><b>${esc(item.name||item.productId||item.id)}</b><small>SKU ${esc(item.productId||item.id)} • Size ${esc(item.size)} • Qty ${Number(item.qty||1)}</small></span><b>${money(item.lineTotal??(Number(item.price||0)*Number(item.qty||1)))}</b></div>`).join("")}</div>
+    <div class="total"><span>Order total</span><strong>${money(order.total)}</strong></div>
+    ${trackingContent}
+  </article>`;
+}
+function connectOrders(user){
+  if(stopOrders){stopOrders();stopOrders=null;}
+  if(!user){$("orders").innerHTML='<div class="empty"><b>No customer signed in</b>Sign in above to see your orders.</div>';return;}
+  $("orders").innerHTML='<div class="empty">Loading your secure order history…</div>';
+  const q=query(collection(db,"orders"),where("uid","==",user.uid),orderBy("createdAt","desc"));
+  stopOrders=onSnapshot(q,snapshot=>{
+    if(snapshot.empty){$("orders").innerHTML='<div class="empty"><b>No orders yet</b>Your confirmed purchases will appear here.</div>';return;}
+    $("orders").innerHTML=snapshot.docs.map(renderOrder).join("");
+  },error=>{
+    $("orders").innerHTML='<div class="empty"><b>Could not load orders</b>'+esc(error.message)+'</div>';
+  });
+}
+$("authForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  try{
+    $("authMessage").textContent="Signing in…";
+    const credential=await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+    if(!credential.user.emailVerified)await sendEmailVerification(credential.user).catch(()=>{});
+    $("authMessage").textContent=credential.user.emailVerified?"Signed in.":"Please verify your email. A verification link has been sent again.";
+  }catch(error){$("authMessage").textContent=(error.code||"auth/error").replace("auth/","")+": "+error.message;}
+});
+$("signup").addEventListener("click",async()=>{
+  try{
+    const email=$("email").value.trim(),password=$("password").value;
+    if(!email||password.length<6)throw new Error("Enter an email and a password with at least 6 characters.");
+    const credential=await createUserWithEmailAndPassword(auth,email,password);
+    await setDoc(doc(db,"customers",credential.user.uid),{uid:credential.user.uid,email,role:"customer",createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
+    await sendEmailVerification(credential.user);
+    $("authMessage").textContent="Account created. Verify the email link before checkout.";
+  }catch(error){$("authMessage").textContent=error.message;}
+});
+$("reset").addEventListener("click",async()=>{
+  const email=$("email").value.trim();
+  if(!email){$("authMessage").textContent="Enter your email address first.";return;}
+  try{await sendPasswordResetEmail(auth,email);$("authMessage").textContent="Password reset instructions sent.";}
+  catch(error){$("authMessage").textContent=error.message;}
+});
+try{
+  const config=window.SFH_FIREBASE_CONFIG;
+  if(!config?.projectId)throw new Error("Firebase web configuration is not available.");
+  const app=getApps().find(item=>item.name==="[DEFAULT]")||initializeApp(config);
+  auth=getAuth(app);db=getFirestore(app);
+  onAuthStateChanged(auth,user=>{
+    currentUser=user||null;
+    $("authArea").hidden=!!user;
+    $("signedIn").hidden=!user;
+    if(user){
+      $("signedIn").innerHTML=`<div class="status ok">Signed in as <b>${esc(user.email||user.uid)}</b> <button id="signout" class="auth-secondary" type="button">Sign out</button></div>${user.emailVerified?"":'<div class="status bad" style="margin-top:8px">Email verification is pending. Check your inbox before placing a new order.</div>'}`;
+      $("signout").addEventListener("click",()=>signOut(auth));
+      status("Your account is connected. Orders update automatically when the shop changes their status.","ok");
+    }else status("Sign in with the email you used at checkout.");
+    connectOrders(user);
+  });
+}catch(error){status("Account service unavailable: "+error.message,"bad");}
+</script>
+</body></html>

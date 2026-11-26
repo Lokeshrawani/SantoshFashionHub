@@ -1,111 +1,211 @@
-/* Santosh Fashion Hub — Step 14: Customer Account in Storefront */
-(async function(){
-  const CDN='https://www.gstatic.com/firebasejs/12.19.0/';
-  let auth=null, db=null;
-  let ready=false;
-  let firebasePromise=null;
+/* Santosh Fashion Hub — secure customer account UI backed by Firebase Authentication */
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-  function cfgReady(c){return c && Object.values(c).every(v=>typeof v==='string'&&v.trim()&&!/^YOUR_/i.test(v));}
-  function esc(s){return String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]))}
+(async function () {
+  const CDN = "https://www.gstatic.com/firebasejs/12.19.0/";
+  let auth = null;
+  let db = null;
+  let ready = false;
+  let initPromise = null;
+  let currentUser = null;
 
-  const addAccountButton=()=>{
-    const actions=document.querySelector('.headerActions');
-    if(!actions||document.getElementById('sfhAccountBtn'))return;
-    const b=document.createElement('button');
-    b.id='sfhAccountBtn'; b.className='sfh-account-btn'; b.type='button';
-    b.innerHTML='<span class="sfh-account-dot"></span><span id="sfhAccountLabel">My Account</span>';
-    b.onclick=()=>window.sfhToggleAccount(true);
-    actions.insertBefore(b,actions.firstChild);
-  };
-
-  const ensurePanel=()=>{
-    if(document.getElementById('sfhAccountPanel'))return;
-    const backdrop=document.createElement('div'); backdrop.id='sfhAccountBackdrop'; backdrop.className='sfh-account-backdrop'; backdrop.onclick=()=>window.sfhToggleAccount(false);
-    const panel=document.createElement('section'); panel.id='sfhAccountPanel'; panel.className='sfh-account-panel';
-    panel.innerHTML=`<div class="sfh-account-head"><div><span>SANTOSH FASHION HUB</span><h3 id="sfhAccountTitle">My Account</h3></div><button class="sfh-account-close" type="button" onclick="sfhToggleAccount(false)">×</button></div><div class="sfh-account-body"><div id="sfhAccountContent"></div></div>`;
-    document.body.append(backdrop,panel);
-  };
-
-  const renderLoggedOut=()=>{
-    const box=document.getElementById('sfhAccountContent');
-    box.innerHTML=`<form id="sfhAccountForm" class="sfh-account-form"><label>Email<input id="sfhAcctEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="sfhAcctPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="Minimum 6 characters"></label><div class="sfh-account-actions"><button class="primary" type="submit" data-mode="signin">Sign In</button><button type="button" id="sfhAcctSignup">Create Account</button></div><div id="sfhAccountMsg" class="sfh-account-msg"></div></form><div class="sfh-account-links"><a href="./sfh-step13-orders.html">📦 My Orders</a><a href="./sfh-step12-firebase-auth.html">⚙️ Account Setup</a></div><div class="sfh-account-note">Your password is handled by Firebase Authentication. Do not share passwords in WhatsApp.</div>`;
-    box.querySelector('#sfhAccountForm').addEventListener('submit',signIn);
-    box.querySelector('#sfhAcctSignup').addEventListener('click',signUp);
-  };
-
-  const renderLoggedIn=(user)=>{
-    const box=document.getElementById('sfhAccountContent');
-    box.innerHTML=`<div class="sfh-account-user"><b>${esc(user.email||'Signed-in customer')}</b><span>Customer ID: ${esc(user.uid)}</span></div><div class="sfh-account-links"><a href="./sfh-step13-orders.html">📦 My Orders</a><button type="button" id="sfhAcctLogout">↪ Sign Out</button></div><div id="sfhAccountMsg" class="sfh-account-msg ok">You are signed in. Checkout can be connected to this account.</div>`;
-    box.querySelector('#sfhAcctLogout').addEventListener('click',async()=>{try{await auth.signOut();}catch(e){showMsg(e.message||'Sign out failed','bad')}});
-  };
-
-  const showMsg=(msg,kind='')=>{const e=document.getElementById('sfhAccountMsg');if(e){e.textContent=msg;e.className='sfh-account-msg '+kind}};
-
-  const updateLabel=(user)=>{
-    const label=document.getElementById('sfhAccountLabel'); const btn=document.getElementById('sfhAccountBtn');
-    if(!label||!btn)return;
-    if(user){label.textContent='Account';btn.classList.add('signed');}else{label.textContent='My Account';btn.classList.remove('signed')}
-  };
-
-  const signIn=async(e)=>{
-    e.preventDefault();
-    if(!ready&&!await initialiseFirebase())return showMsg('Firebase is not connected yet.','bad');
-    showMsg('Signing in…');
-    try{await auth.signInWithEmailAndPassword(document.getElementById('sfhAcctEmail').value.trim(),document.getElementById('sfhAcctPassword').value);showMsg('Signed in successfully.','ok')}
-    catch(err){showMsg((err.code||'auth/error').replace('auth/','')||'Sign-in failed.','bad')}
-  };
-
-  const signUp=async()=>{
-    if(!ready&&!await initialiseFirebase())return showMsg('Firebase is not connected yet.','bad');
-    const email=document.getElementById('sfhAcctEmail').value.trim(), password=document.getElementById('sfhAcctPassword').value;
-    if(!email||password.length<6)return showMsg('Enter an email and at least 6 characters password.','bad');
-    showMsg('Creating account…');
-    try{
-      const cred=await auth.createUserWithEmailAndPassword(email,password);
-      if(db) await db.collection('customers').doc(cred.user.uid).set({email:cred.user.email||'',updatedAt:Date.now(),createdAt:Date.now(),role:'customer'},{merge:true});
-      showMsg('Account created successfully.','ok');
-    }catch(err){showMsg((err.code||'auth/error').replace('auth/','')||'Account creation failed.','bad')}
-  };
-
-  async function initialiseFirebase(){
-    if(ready)return true;
-    if(firebasePromise)return firebasePromise;
-    firebasePromise=(async()=>{
-      try{
-        // Let the public config script run before initializing Firebase.
-        await new Promise(resolve=>setTimeout(resolve,0));
-        const cfg=window.SFH_FIREBASE_CONFIG;
-        if(!cfgReady(cfg))return false;
-        const [{initializeApp,getApps},{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut},{getFirestore,doc,setDoc}]=await Promise.all([
-          import(CDN+'firebase-app.js'),
-          import(CDN+'firebase-auth.js'),
-          import(CDN+'firebase-firestore.js')
-        ]);
-        const app=getApps().find(item=>item.name==='[DEFAULT]')||initializeApp(cfg);
-        auth=getAuth(app);db=getFirestore(app);ready=true;
-        auth.signInWithEmailAndPassword=signInWithEmailAndPassword.bind(null,auth);
-        auth.createUserWithEmailAndPassword=createUserWithEmailAndPassword.bind(null,auth);
-        auth.signOut=signOut.bind(null,auth);
-        db.collection=(path)=>({doc:(id)=>({set:(data,opts)=>setDoc(doc(db,path,id),data,opts)})});
-        onAuthStateChanged(auth,user=>{updateLabel(user);if(document.getElementById('sfhAccountPanel')?.classList.contains('open'))user?renderLoggedIn(user):renderLoggedOut()});
-        return true;
-      }catch(error){console.warn('Santosh Fashion Hub account auth:',error);return false;}
-    })();
-    return firebasePromise;
+  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[char]));
+  function configReady(config) {
+    return config && typeof config.projectId === "string" && config.projectId.trim() &&
+      Object.values(config).every(value => typeof value === "string" && value.trim() && !/^YOUR_/i.test(value));
   }
-
-  window.sfhToggleAccount=(open)=>{
+  function message(text, kind = "") {
+    const target = document.getElementById("sfhAccountMsg");
+    if (target) { target.textContent = text; target.className = "sfh-account-msg " + kind; }
+  }
+  function addAccountButton() {
+    const actions = document.querySelector(".headerActions");
+    if (!actions || document.getElementById("sfhAccountBtn")) return;
+    const button = document.createElement("button");
+    button.id = "sfhAccountBtn";
+    button.className = "sfh-account-btn";
+    button.type = "button";
+    button.innerHTML = '<span class="sfh-account-dot"></span><span id="sfhAccountLabel">My Account</span>';
+    button.addEventListener("click", () => window.sfhToggleAccount(true));
+    actions.insertBefore(button, actions.firstChild);
+  }
+  function ensurePanel() {
+    if (document.getElementById("sfhAccountPanel")) return;
+    const backdrop = document.createElement("div");
+    backdrop.id = "sfhAccountBackdrop";
+    backdrop.className = "sfh-account-backdrop";
+    backdrop.addEventListener("click", () => window.sfhToggleAccount(false));
+    const panel = document.createElement("section");
+    panel.id = "sfhAccountPanel";
+    panel.className = "sfh-account-panel";
+    panel.innerHTML = `
+      <div class="sfh-account-head">
+        <div><span>SANTOSH FASHION HUB</span><h3 id="sfhAccountTitle">My Account</h3></div>
+        <button class="sfh-account-close" type="button" aria-label="Close account panel" onclick="sfhToggleAccount(false)">×</button>
+      </div>
+      <div class="sfh-account-body"><div id="sfhAccountContent"></div></div>`;
+    document.body.append(backdrop, panel);
+  }
+  function renderLoggedOut() {
+    const box = document.getElementById("sfhAccountContent");
+    if (!box) return;
+    box.innerHTML = `
+      <form id="sfhAccountForm" class="sfh-account-form">
+        <label>Full name (for new accounts)<input id="sfhAcctName" type="text" maxlength="80" autocomplete="name" placeholder="Your name"></label>
+        <label>Email address<input id="sfhAcctEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+        <label>Password<input id="sfhAcctPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="At least 6 characters"></label>
+        <div class="sfh-account-actions">
+          <button class="primary" type="submit">Sign In</button>
+          <button type="button" id="sfhAcctSignup">Create Account</button>
+        </div>
+        <div class="sfh-account-secondary">
+          <button type="button" id="sfhAcctReset">Forgot password?</button>
+        </div>
+        <div id="sfhAccountMsg" class="sfh-account-msg"></div>
+      </form>
+      <div class="sfh-account-links"><a href="./sfh-step13-orders.html">📦 My Orders & Tracking</a></div>
+      <div class="sfh-account-note">Your password is managed by Firebase Authentication. We never ask you to send passwords by WhatsApp.</div>`;
+    box.querySelector("#sfhAccountForm").addEventListener("submit", signIn);
+    box.querySelector("#sfhAcctSignup").addEventListener("click", signUp);
+    box.querySelector("#sfhAcctReset").addEventListener("click", resetPassword);
+  }
+  function renderLoggedIn(user) {
+    const box = document.getElementById("sfhAccountContent");
+    if (!box) return;
+    const verified = user.emailVerified === true;
+    box.innerHTML = `
+      <div class="sfh-account-user">
+        <b>${escapeHtml(user.displayName || user.email || "Signed-in customer")}</b>
+        <span>${escapeHtml(user.email || "")}</span>
+        <span>Account status: ${verified ? "Email verified" : "Email verification required"}</span>
+      </div>
+      ${verified ? "" : '<div class="sfh-account-verify"><b>Verify your email to place orders.</b><p>Open the verification link sent to your inbox, then sign in again.</p><button type="button" id="sfhAcctResend">Resend verification email</button></div>'}
+      <div class="sfh-account-links">
+        <a href="./sfh-step13-orders.html">📦 My Orders & Tracking</a>
+        <button type="button" id="sfhAcctLogout">↪ Sign Out</button>
+      </div>
+      <div id="sfhAccountMsg" class="sfh-account-msg ${verified ? "ok" : ""}">${verified ? "You are signed in securely." : "Your account is created. Verify your email to continue."}</div>`;
+    box.querySelector("#sfhAcctLogout").addEventListener("click", async () => {
+      try { await signOut(auth); }
+      catch (error) { message(error.message || "Sign out failed.", "bad"); }
+    });
+    box.querySelector("#sfhAcctResend")?.addEventListener("click", async () => {
+      try { await sendEmailVerification(user); message("A new verification email has been sent.", "ok"); }
+      catch (error) { message(error.message || "Could not send verification email.", "bad"); }
+    });
+  }
+  function updateLabel(user) {
+    const label = document.getElementById("sfhAccountLabel");
+    const button = document.getElementById("sfhAccountBtn");
+    if (!label || !button) return;
+    label.textContent = user ? (user.emailVerified ? "Account" : "Verify email") : "My Account";
+    button.classList.toggle("signed", !!user);
+  }
+  async function signIn(event) {
+    event.preventDefault();
+    if (!ready && !await initialiseFirebase()) return message("Firebase account service is not connected yet.", "bad");
+    const email = document.getElementById("sfhAcctEmail").value.trim();
+    const password = document.getElementById("sfhAcctPassword").value;
+    message("Signing in…");
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      if (!credential.user.emailVerified) {
+        await sendEmailVerification(credential.user).catch(() => {});
+        message("Your email is not verified yet. We sent another verification link. Open it, then sign in again.", "bad");
+      } else {
+        message("Signed in successfully.", "ok");
+      }
+    } catch (error) {
+      message((error.code || "auth/error").replace("auth/", "") + ". Please check your email and password.", "bad");
+    }
+  }
+  async function signUp() {
+    if (!ready && !await initialiseFirebase()) return message("Firebase account service is not connected yet.", "bad");
+    const email = document.getElementById("sfhAcctEmail").value.trim();
+    const password = document.getElementById("sfhAcctPassword").value;
+    const displayName = document.getElementById("sfhAcctName").value.trim().slice(0, 80);
+    if (!email || password.length < 6) return message("Enter an email and a password with at least 6 characters.", "bad");
+    message("Creating your secure customer account…");
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      if (displayName) await updateProfile(credential.user, { displayName });
+      await setDoc(doc(db, "customers", credential.user.uid), {
+        uid: credential.user.uid,
+        email: credential.user.email || email,
+        displayName,
+        role: "customer",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      await sendEmailVerification(credential.user);
+      message("Account created. Please verify the link sent to " + email + " before checkout.", "ok");
+    } catch (error) {
+      message((error.code || "auth/error").replace("auth/", "") + ": " + (error.message || "Account creation failed."), "bad");
+    }
+  }
+  async function resetPassword() {
+    if (!ready && !await initialiseFirebase()) return message("Firebase account service is not connected yet.", "bad");
+    const email = document.getElementById("sfhAcctEmail").value.trim();
+    if (!email) return message("Enter your email address first.", "bad");
+    try {
+      await sendPasswordResetEmail(auth, email);
+      message("Password reset instructions have been sent to " + email + ".", "ok");
+    } catch (error) {
+      message((error.code || "auth/error").replace("auth/", "") + ": " + (error.message || "Could not send reset email."), "bad");
+    }
+  }
+  async function initialiseFirebase() {
+    if (ready) return true;
+    if (initPromise) return initPromise;
+    initPromise = (async () => {
+      try {
+        const config = window.SFH_FIREBASE_CONFIG;
+        if (!configReady(config)) return false;
+        const [{ initializeApp, getApps }, { getAuth }, { getFirestore }] = await Promise.all([
+          import(CDN + "firebase-app.js"),
+          import(CDN + "firebase-auth.js"),
+          import(CDN + "firebase-firestore.js")
+        ]);
+        const app = getApps().find(existing => existing.name === "[DEFAULT]") || initializeApp(config);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        ready = true;
+        onAuthStateChanged(auth, user => {
+          currentUser = user || null;
+          updateLabel(currentUser);
+          if (document.getElementById("sfhAccountPanel")?.classList.contains("open")) {
+            currentUser ? renderLoggedIn(currentUser) : renderLoggedOut();
+          }
+          document.dispatchEvent(new CustomEvent("sfh-customer-auth", { detail: { user: currentUser } }));
+        });
+        return true;
+      } catch (error) {
+        console.error("Santosh Fashion Hub account auth:", error);
+        return false;
+      }
+    })();
+    return initPromise;
+  }
+  window.sfhToggleAccount = open => {
     ensurePanel();
-    document.getElementById('sfhAccountPanel').classList.toggle('open',open);
-    document.getElementById('sfhAccountBackdrop').classList.toggle('open',open);
-    document.body.style.overflow=open?'hidden':'';
-    if(open)initialiseFirebase();
+    document.getElementById("sfhAccountPanel").classList.toggle("open", !!open);
+    document.getElementById("sfhAccountBackdrop").classList.toggle("open", !!open);
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      if (currentUser) renderLoggedIn(currentUser);
+      else renderLoggedOut();
+      initialiseFirebase().then(ok => { if (ok && currentUser) renderLoggedIn(currentUser); });
+    }
   };
-
-  addAccountButton();ensurePanel();renderLoggedOut();
-
-  document.addEventListener('click',e=>{
-    const btn=e.target.closest?.('[data-account-open]');
-    if(btn){e.preventDefault();window.sfhToggleAccount(true)}
+  addAccountButton();
+  ensurePanel();
+  renderLoggedOut();
+  initialiseFirebase();
+  document.addEventListener("click", event => {
+    const trigger = event.target.closest?.("[data-account-open]");
+    if (trigger) { event.preventDefault(); window.sfhToggleAccount(true); }
   });
 })();
